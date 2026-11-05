@@ -4,7 +4,7 @@
 #define MyAppName "P.H.O.E.N.I.X."
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Antigravity AI"
-#define MyAppURL "https://github.com/swayam/phoenix"
+#define MyAppURL "https://github.com/swayamprabhu2005/P.H.O.E.N.I.X."
 #define MyAppExeName "run.bat"
 
 [Setup]
