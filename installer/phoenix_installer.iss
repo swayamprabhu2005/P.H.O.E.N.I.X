@@ -1,0 +1,44 @@
+; P.H.O.E.N.I.X. Windows Desktop Application Installer
+; Built using Inno Setup (https://jrsoftware.org/isinfo.php)
+
+#define MyAppName "P.H.O.E.N.I.X."
+#define MyAppVersion "1.0.0"
+#define MyAppPublisher "Antigravity AI"
+#define MyAppURL "https://github.com/swayam/phoenix"
+#define MyAppExeName "run.bat"
+
+[Setup]
+AppId={{94F0C3D7-6F7D-4F77-A3BA-04987E92A111}
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={autopf}\{#MyAppName}
+DisableProgramGroupPage=yes
+LicenseFile=LICENSE.txt
+OutputDir=dist_installer
+OutputBaseFilename=PHOENIX_Setup
+Compression=lzma
+SolidCompression=yes
+WizardStyle=modern
+PrivilegesRequired=lowest
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "startupicon"; Description: "Launch P.H.O.E.N.I.X. automatically on Windows startup"; GroupDescription: "Startup:"; Flags: unchecked
+
+[Files]
+Source: "..\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git*,.pytest_cache,tests,dist_installer"
+
+[Icons]
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon
+Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: startupicon
+
+[Run]
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall nowait skipifsilent

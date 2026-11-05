@@ -1,0 +1,10 @@
+P.H.O.E.N.I.X. END USER LICENSE & PERMISSIONS AGREEMENT
+
+By installing and using P.H.O.E.N.I.X. Desktop Assistant, you grant the application permission to:
+1. Microphone Access: Capture local microphone audio for offline speech recognition strictly while awakened.
+2. System Automation: Perform authorized Windows operations (opening authorized applications, File Explorer navigation, creating files in your working directories).
+3. Clipboard Integration: Copy active browser URLs and screenshots to your Windows clipboard.
+
+Data Privacy Guarantee:
+- 100% Offline: No voice audio, keystrokes, or files are ever sent to external servers or cloud services.
+- Local Storage: Configuration and speech models reside strictly on your local PC.
