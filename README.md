@@ -1,13 +1,13 @@
-# P.H.O.E.N.I.X. — Offline Windows Desktop AI Assistant
+# P.H.O.E.N.I.X.
 ### **Personalized Holographic Operator for Execution, Navigation, & Interactive eXtension**
 
-[![Download for Windows](https://img.shields.io/badge/Download-Windows%20Setup%20(.exe)-00e575?style=for-the-badge&logo=windows&logoColor=041008)](https://github.com/swayam/phoenix/releases/latest/download/PHOENIX_Setup.exe)
-[![Live Web Showcase](https://img.shields.io/badge/Live%20Showcase-GitHub%20Pages-10b981?style=for-the-badge&logo=githubpages&logoColor=white)](https://swayam.github.io/phoenix/)
-[![Release](https://img.shields.io/badge/Release-v1.0.0-34d399?style=for-the-badge)](https://github.com/swayam/phoenix/releases/tag/v1.0.0)
-[![License: MIT](https://img.shields.io/badge/License-MIT-f8fafc?style=for-the-badge)](LICENSE)
+[![Download for Windows](https://img.shields.io/badge/Download-Windows%20Setup%20(.exe)-00e575?style=for-the-badge&logo=windows&logoColor=041008)](https://github.com/swayamprabhu2005/P.H.O.E.N.I.X./releases/latest/download/PHOENIX_Setup.exe)
+[![Live Web Showcase](https://img.shields.io/badge/Live%20Showcase-GitHub%20Pages-10b981?style=for-the-badge&logo=githubpages&logoColor=white)](https://swayamprabhu2005.github.io/P.H.O.E.N.I.X./)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-34d399?style=for-the-badge)](https://github.com/swayamprabhu2005/P.H.O.E.N.I.X./releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-f8fafc?style=for-the-badge)](installer/LICENSE.txt)
 
-> **Live Showcase Website:** [https://swayam.github.io/phoenix/](https://swayam.github.io/phoenix/)  
-> **Direct Download (.exe):** [PHOENIX_Setup.exe (v1.0.0)](https://github.com/swayam/phoenix/releases/latest/download/PHOENIX_Setup.exe)
+> **Live Showcase Website:** [https://swayamprabhu2005.github.io/P.H.O.E.N.I.X./](https://swayamprabhu2005.github.io/P.H.O.E.N.I.X./)  
+> **Direct Download (.exe):** [PHOENIX_Setup.exe](https://github.com/swayamprabhu2005/P.H.O.E.N.I.X./releases/latest/download/PHOENIX_Setup.exe)
 
 ---
 
@@ -71,7 +71,7 @@ Designed specifically for **low-resource Windows computers (4 GB RAM, CPU-only, 
 
 ## Quick Installation for End Users
 
-1. Download the latest installer: **[PHOENIX_Setup.exe](https://github.com/swayam/phoenix/releases/latest/download/PHOENIX_Setup.exe)**.
+1. Download the latest installer: **[PHOENIX_Setup.exe](https://github.com/swayamprabhu2005/P.H.O.E.N.I.X./releases/latest/download/PHOENIX_Setup.exe)**.
 2. Double-click the installer and follow the setup wizard.
    > *Note for Windows users: If Microsoft Defender SmartScreen appears, click **"More info"** &rarr; **"Run anyway"**.*
 3. Launch P.H.O.E.N.I.X. from your Desktop or Start Menu.
@@ -84,8 +84,8 @@ Designed specifically for **low-resource Windows computers (4 GB RAM, CPU-only, 
 If you prefer cloning and running from source:
 
 ```bash
-git clone https://github.com/swayam/phoenix.git
-cd phoenix
+git clone https://github.com/swayamprabhu2005/P.H.O.E.N.I.X..git
+cd P.H.O.E.N.I.X.
 run.bat
 ```
 
