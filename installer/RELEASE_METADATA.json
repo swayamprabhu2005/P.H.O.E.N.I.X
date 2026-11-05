@@ -1,0 +1,16 @@
+{
+  "tag_name": "v1.0.0",
+  "target_commitish": "main",
+  "name": "P.H.O.E.N.I.X. v1.0.0 — Offline Windows AI Assistant",
+  "draft": false,
+  "prerelease": false,
+  "assets": [
+    {
+      "name": "PHOENIX_Setup.exe",
+      "path": "installer/dist_installer/PHOENIX_Setup.exe",
+      "label": "P.H.O.E.N.I.X. Windows Standalone Setup Installer"
+    }
+  ],
+  "website_url": "https://swayam.github.io/phoenix/",
+  "download_url": "https://github.com/swayam/phoenix/releases/latest/download/PHOENIX_Setup.exe"
+}

@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>P.H.O.E.N.I.X. — Offline Windows Desktop AI Assistant</title>
+  <meta name="description" content="P.H.O.E.N.I.X. is a lightweight, 100% offline Windows desktop AI assistant with a floating 3D holographic Dyson Sphere, voice-controlled OS automation, and silent ambient speech filtering.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #060907;
+      --bg-surface: #0c130f;
+      --bg-card: rgba(16, 26, 20, 0.72);
+      --bg-card-hover: rgba(22, 38, 28, 0.85);
+      --emerald-primary: #00e575;
+      --emerald-glow: rgba(0, 229, 117, 0.45);
+      --emerald-soft: rgba(0, 229, 117, 0.12);
+      --emerald-border: rgba(0, 229, 117, 0.24);
+      --emerald-border-bright: rgba(0, 229, 117, 0.6);
+      --mint-accent: #34d399;
+      --text-white: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(0, 229, 117, 0.09) 0%, transparent 60%),
+        radial-gradient(circle at 100% 40%, rgba(16, 185, 129, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 0% 80%, rgba(5, 150, 105, 0.04) 0%, transparent 50%);
+    }
+
+    /* Ambient Quantum Grid */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Navigation Bar */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(6, 9, 7, 0.82);
+    }
+
+    .nav-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 72px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-white);
+      font-weight: 800;
+      font-size: 19px;
+      letter-spacing: 2px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--emerald-primary);
+      box-shadow: 0 0 10px var(--emerald-primary), 0 0 20px var(--emerald-primary);
+      animation: pulseGlow 2s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: scale(0.9); opacity: 0.8; }
+      100% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.25s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--emerald-primary);
+    }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--emerald-primary);
+      color: #041008;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 20px rgba(0, 229, 117, 0.35);
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 28px rgba(0, 229, 117, 0.6);
+      background: #05ffa1;
+    }
+
+    /* Hero Section */
+    .hero {
+      padding-top: 160px;
+      padding-bottom: 100px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: center;
+      gap: 40px;
+      min-height: 90vh;
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--emerald-soft);
+      border: 1px solid var(--emerald-border);
+      color: var(--emerald-primary);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      width: fit-content;
+    }
+
+    h1 {
+      font-size: 54px;
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--mint-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 580px;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 32px;
+      background: var(--emerald-primary);
+      color: #030d06;
+      font-weight: 800;
+      font-size: 15px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 25px rgba(0, 229, 117, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 35px rgba(0, 229, 117, 0.65);
+      background: #05ffa1;
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 26px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-white);
+      font-weight: 600;
+      font-size: 15px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--emerald-border);
+      color: var(--emerald-primary);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .specs-pill {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      margin-top: 8px;
+    }
+
+    .specs-pill span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 3D Holographic Stage */
+    .hero-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .stage-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-card);
+      border: 1px solid var(--emerald-border);
+      border-radius: 28px;
+      padding: 24px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 229, 117, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .stage-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .stage-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--emerald-primary);
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+
+    .stage-hint {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    #canvas-container {
+      width: 360px;
+      height: 360px;
+      cursor: grab;
+      position: relative;
+      border-radius: 50%;
+    }
+
+    #canvas-container:active {
+      cursor: grabbing;
+    }
+
+    .stage-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .stage-btn {
+      padding: 6px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 20px;
+      border: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .stage-btn:hover {
+      background: var(--emerald-soft);
+      border-color: var(--emerald-border);
+      color: var(--text-white);
+    }
+
+    .stage-btn.active {
+      background: var(--emerald-soft);
+      border-color: var(--emerald-primary);
+      color: var(--emerald-primary);
+      box-shadow: 0 0 14px var(--emerald-glow);
+    }
+
+    /* Section Styling */
+    section {
+      padding: 100px 0;
+      position: relative;
+    }
+
+    .section-head {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 60px auto;
+    }
+
+    .section-head h2 {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-top: 14px;
+      background: linear-gradient(135deg, #ffffff 50%, var(--mint-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-head p {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-top: 12px;
+    }
+
+    /* Features Bento Grid */
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .bento-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bento-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--emerald-primary), transparent);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .bento-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--emerald-border);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 229, 117, 0.1);
+    }
+
+    .bento-card:hover::before {
+      opacity: 1;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--emerald-soft);
+      border: 1px solid var(--emerald-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--emerald-primary);
+      font-size: 22px;
+    }
+
+    .bento-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .bento-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Commands Table / Cheat Sheet */
+    .cmd-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 24px;
+      padding: 32px;
+      backdrop-filter: blur(14px);
+    }
+
+    .cmd-tabs {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-white);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      color: var(--emerald-primary);
+      background: var(--emerald-soft);
+      border-color: var(--emerald-border);
+    }
+
+    .cmd-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .cmd-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      transition: border-color 0.2s ease;
+    }
+
+    .cmd-item:hover {
+      border-color: var(--emerald-border);
+    }
+
+    .cmd-phrase {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--emerald-primary);
+      font-weight: 600;
+    }
+
+    .cmd-action {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+
+    /* Download Box */
+    .download-card {
+      background: linear-gradient(135deg, rgba(16, 26, 20, 0.95), rgba(8, 14, 10, 0.98));
+      border: 1px solid var(--emerald-border-bright);
+      border-radius: 28px;
+      padding: 56px 40px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 50px rgba(0, 229, 117, 0.15);
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .download-card h2 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .download-card p {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 12px auto 32px auto;
+    }
+
+    .install-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      text-align: left;
+      margin-top: 48px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 36px;
+    }
+
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--emerald-soft);
+      border: 1px solid var(--emerald-border);
+      color: var(--emerald-primary);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+    }
+
+    .step-item h4 {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .step-item p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .smartscreen-alert {
+      margin-top: 28px;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      font-size: 12px;
+      color: var(--text-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 48px 0;
+      margin-top: 80px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .footer-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--emerald-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding-top: 120px;
+        text-align: center;
+      }
+      .hero-content {
+        align-items: center;
+      }
+      .cta-group {
+        justify-content: center;
+      }
+      .bento-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .cmd-list {
+        grid-template-columns: 1fr;
+      }
+      .install-steps {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 38px; }
+      .bento-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <header>
+    <div class="container nav-wrap">
+      <a href="#" class="brand">
+        <span class="status-dot"></span>
+        <span>P.H.O.E.N.I.X.</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#features">Capabilities</a></li>
+        <li><a href="#sphere">3D Core</a></li>
+        <li><a href="#commands">Commands</a></li>
+        <li><a href="#download">Download</a></li>
+        <li><a href="https://github.com/swayam/phoenix" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+
+      <a href="#download" class="nav-cta">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Download v1.0.0</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <div class="container">
+    <div class="hero">
+      <div class="hero-content">
+        <div class="badge">
+          <span>●</span> Offline Windows AI Assistant • v1.0.0
+        </div>
+
+        <h1>Voice-Powered Desktop Automation. Zero Cloud Required.</h1>
+
+        <p class="hero-desc">
+          P.H.O.E.N.I.X. is a lightweight, 100% offline Windows desktop AI assistant. Featuring a borderless 3D holographic Dyson Sphere, voice-controlled file navigation, multi-account switching, and silent ambient speech filtering on 4 GB RAM.
+        </p>
+
+        <div class="cta-group">
+          <a href="https://github.com/swayam/phoenix/releases/latest/download/PHOENIX_Setup.exe" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.551H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/></svg>
+            <span>Download for Windows (.exe)</span>
+          </a>
+
+          <a href="#commands" class="btn-secondary">
+            <span>Explore Voice Commands</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </a>
+        </div>
+
+        <div class="specs-pill">
+          <span>✔ Windows 10 / 11 (64-bit)</span>
+          <span>•</span>
+          <span>✔ ~120 MB RAM</span>
+          <span>•</span>
+          <span>✔ 100% Offline Speech</span>
+        </div>
+      </div>
+
+      <!-- 3D Holographic Stage -->
+      <div class="hero-stage" id="sphere">
+        <div class="stage-card">
+          <div class="stage-header">
+            <span class="stage-title">3D Dyson Sphere Stage</span>
+            <span class="stage-hint">Drag with mouse</span>
+          </div>
+
+          <div id="canvas-container" title="Click core or drag mouse to orbit in 3D"></div>
+
+          <div class="stage-controls">
+            <button id="btn-active" class="stage-btn active" onclick="setCoreMode('active')">Active Core</button>
+            <button id="btn-sleep" class="stage-btn" onclick="setCoreMode('sleep')">Sleep (Dormant)</button>
+            <button id="btn-listening" class="stage-btn" onclick="setCoreMode('listening')">Listening (Fast)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Capabilities Grid -->
+  <section id="features">
+    <div class="container">
+      <div class="section-head">
+        <div class="badge">Engineered For Performance</div>
+        <h2>Designed to Execute, Not Just Chat.</h2>
+        <p>Built from the ground up to operate offline with direct Windows integration, low latency, and zero telemetry.</p>
+      </div>
+
+      <div class="bento-grid">
+        <div class="bento-card">
+          <div class="card-icon">⚡</div>
+          <h3>100% Offline Speech Engine</h3>
+          <p>Powered by local Vosk acoustic neural models stored strictly inside the project root. Zero audio packets ever leave your machine.</p>
+        </div>
+
+        <div class="bento-card">
+          <div class="card-icon">🧠</div>
+          <h3>Ultra-Low 4 GB RAM Footprint</h3>
+          <p>Engineered for lightweight desktop agility. Runs smoothly on standard dual-core CPUs with only ~120 MB resident memory and zero GPU requirements.</p>
+        </div>
+
+        <div class="bento-card">
+          <div class="card-icon">☄️</div>
+          <h3>Comet Browser & Perplexity</h3>
+          <p>Launches custom research environments instantly with voice commands like <em>"Learning mode Perplexity"</em> mapped directly to Comet Browser.</p>
+        </div>
+
+        <div class="bento-card">
+          <div class="card-icon">👥</div>
+          <h3>Multi-Account Switching</h3>
+          <p>Effortlessly switch between 5+ Google email accounts hands-free. Command <em>"Switch to account 3"</em> to jump directly to specific profiles.</p>
+        </div>
+
+        <div class="bento-card">
+          <div class="card-icon">📂</div>
+          <h3>Voice File Management</h3>
+          <p>Open PDF reports, Word documents, text notes, and presentations by name. Create, rename, and navigate folders with natural voice commands.</p>
+        </div>
+
+        <div class="bento-card">
+          <div class="card-icon">🤫</div>
+          <h3>Strict Silent Rejection</h3>
+          <p>Only acts on registered voice intents. Ambient conversation and casual room speech are silently ignored with zero irritating failure audios.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Commands Reference -->
+  <section id="commands">
+    <div class="container">
+      <div class="section-head">
+        <div class="badge">Speech Vocabulary</div>
+        <h2>Predefined Voice Operations.</h2>
+        <p>Short, deterministic commands for high-speed execution without conversational fluff.</p>
+      </div>
+
+      <div class="cmd-wrapper">
+        <div class="cmd-tabs">
+          <button class="tab-btn active" onclick="filterCommands('system')">System & Desktop</button>
+          <button class="tab-btn" onclick="filterCommands('apps')">Apps & Research</button>
+          <button class="tab-btn" onclick="filterCommands('google')">Google & Accounts</button>
+          <button class="tab-btn" onclick="filterCommands('files')">Files & Navigation</button>
+        </div>
+
+        <div class="cmd-list" id="command-list-container">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download & Install Section -->
+  <section id="download">
+    <div class="container">
+      <div class="download-card">
+        <div class="badge" style="margin: 0 auto 16px auto;">Windows Desktop Release</div>
+        <h2>Get P.H.O.E.N.I.X. v1.0.0</h2>
+        <p>Download the official standalone Windows setup installer. Pre-packaged, ready to launch with zero manual setup.</p>
+
+        <a href="https://github.com/swayam/phoenix/releases/latest/download/PHOENIX_Setup.exe" class="btn-primary" style="margin: 0 auto; display: inline-flex;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.551H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/></svg>
+          <span>Download PHOENIX_Setup.exe (v1.0.0)</span>
+        </a>
+
+        <div class="smartscreen-alert">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span>Note for Windows users: If SmartScreen appears, click <strong>"More info"</strong> &rarr; <strong>"Run anyway"</strong>.</span>
+        </div>
+
+        <div class="install-steps">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <h4>Download Installer</h4>
+            <p>Download the single-file setup installer <code>PHOENIX_Setup.exe</code>.</p>
+          </div>
+
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <h4>Run Setup Wizard</h4>
+            <p>Select your install path and choose your desktop shortcut preferences.</p>
+          </div>
+
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <h4>Launch & Greet</h4>
+            <p>Click the 3D core to awaken: <em>"At your service, Swayam."</em></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container footer-wrap">
+      <div>
+        <strong>P.H.O.E.N.I.X.</strong> — Personalized Holographic Operator for Execution, Navigation, & Interactive eXtension
+      </div>
+
+      <ul class="footer-links">
+        <li><a href="https://github.com/swayam/phoenix" target="_blank" rel="noopener">GitHub Repository</a></li>
+        <li><a href="https://github.com/swayam/phoenix/releases" target="_blank" rel="noopener">All Releases</a></li>
+        <li><a href="https://github.com/swayam/phoenix/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <!-- Three.js 3D Dyson Sphere WebGL Engine -->
+  <script>
+    // Commands Data
+    const commandsData = {
+      system: [
+        { phrase: '"stop" / "go to sleep"', action: 'Transitions into dormant sleep mode' },
+        { phrase: '"what time is it"', action: 'Spoken real-time system clock' },
+        { phrase: '"check battery"', action: 'Spoken battery level & charging state' },
+        { phrase: '"show desktop"', action: 'Minimizes all open windows (Win+D)' },
+        { phrase: '"take screenshot"', action: 'Saves to Downloads/ + clipboard' },
+        { phrase: '"open clipboard"', action: 'Opens Windows clipboard history (Win+V)' },
+        { phrase: '"volume up" / "mute"', action: 'System audio level control' },
+        { phrase: '"lock pc"', action: 'Secures Windows workstation (Win+L)' }
+      ],
+      apps: [
+        { phrase: '"learning mode perplexity"', action: 'Opens Perplexity AI in Comet Browser' },
+        { phrase: '"coding mode vs code"', action: 'Launches Visual Studio Code' },
+        { phrase: '"coding mode antigravity"', action: 'Launches Antigravity Agentic IDE' },
+        { phrase: '"open command prompt"', action: 'Launches Windows CMD terminal' },
+        { phrase: '"open powershell"', action: 'Launches Windows PowerShell terminal' },
+        { phrase: '"search [query]"', action: 'Performs instant Google search' },
+        { phrase: '"copy url"', action: 'Copies active browser tab address' },
+        { phrase: '"new tab" / "close tab"', action: 'Browser tab management' }
+      ],
+      google: [
+        { phrase: '"open gmail"', action: 'Opens Gmail web interface' },
+        { phrase: '"open google drive"', action: 'Opens Google Drive workspace' },
+        { phrase: '"switch to account 1"', action: 'Navigates to primary profile (/u/0/)' },
+        { phrase: '"switch to account 2"', action: 'Navigates to secondary profile (/u/1/)' },
+        { phrase: '"switch to account 5"', action: 'Direct deep-link to 5th Google profile' },
+        { phrase: '"switch account"', action: 'Opens Google Account Chooser' }
+      ],
+      files: [
+        { phrase: '"open pdf [name]"', action: 'Finds & opens matching PDF in active path' },
+        { phrase: '"open word [name]"', action: 'Finds & opens matching DOCX in active path' },
+        { phrase: '"open text [name]"', action: 'Finds & opens matching TXT in active path' },
+        { phrase: '"open presentation [name]"', action: 'Finds & opens matching PPTX in active path' },
+        { phrase: '"create folder [name]"', action: 'Creates new directory in active directory' },
+        { phrase: '"create text file [name]"', action: 'Creates new .txt file' },
+        { phrase: '"create word file [name]"', action: 'Creates new .docx Word file' },
+        { phrase: '"go to [drive] drive"', action: 'Navigates File Explorer to specified drive' }
+      ]
+    };
+
+    function filterCommands(category) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const container = document.getElementById('command-list-container');
+      container.innerHTML = '';
+
+      const items = commandsData[category] || [];
+      items.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'cmd-item';
+        div.innerHTML = `
+          <span class="cmd-phrase">${item.phrase}</span>
+          <span class="cmd-action">${item.action}</span>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Initialize default tab
+    filterCommands('system');
+
+    // -------------------------------------------------------------
+    // Three.js 3D Dyson Sphere Engine (Quantum Emerald / Titanium Palette)
+    // -------------------------------------------------------------
+    const stageContainer = document.getElementById('canvas-container');
+    const width = 360;
+    const height = 360;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.set(0, 0, 13.8);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0x000000, 0);
+    stageContainer.appendChild(renderer.domElement);
+
+    const dysonGroup = new THREE.Group();
+    scene.add(dysonGroup);
+
+    // Quantum Emerald Lighting
+    scene.add(new THREE.AmbientLight(0x021208, 1.2));
+    const coreLight = new THREE.PointLight(0x00e575, 4.5, 35);
+    dysonGroup.add(coreLight);
+    const accentLight = new THREE.PointLight(0x34d399, 2.5, 25);
+    accentLight.position.set(0, 0, 2);
+    dysonGroup.add(accentLight);
+
+    // Inner White-Platinum Core
+    const innerCore = new THREE.Mesh(
+      new THREE.SphereGeometry(0.85, 32, 32),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.96 })
+    );
+    dysonGroup.add(innerCore);
+
+    // Quantum Filament Plasma Shell
+    const plasmaShell = new THREE.Mesh(
+      new THREE.SphereGeometry(1.22, 24, 24),
+      new THREE.MeshBasicMaterial({ color: 0x00e575, wireframe: true, transparent: true, opacity: 0.70, blending: THREE.AdditiveBlending })
+    );
+    dysonGroup.add(plasmaShell);
+
+    // Emerald Corona Cloud
+    const corona = new THREE.Mesh(
+      new THREE.SphereGeometry(1.55, 20, 20),
+      new THREE.MeshBasicMaterial({ color: 0x059669, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending })
+    );
+    dysonGroup.add(corona);
+
+    // 20 Multi-Axis Compacted Dyson Rings
+    const ringConfigs = [
+      { r: 1.85, t: 0.055, rx: 0.5, ry: 0.2, rz: 0.1, sx: 0.016, sy: 0.024, sz: -0.012, c: 0x00e575 },
+      { r: 2.00, t: 0.050, rx: -0.6, ry: 0.5, rz: 0.4, sx: -0.020, sy: 0.015, sz: 0.018, c: 0x10b981 },
+      { r: 2.15, t: 0.060, rx: 0.9, ry: -0.3, rz: 0.6, sx: 0.014, sy: -0.022, sz: 0.015, c: 0x05ffa1 },
+      { r: 2.30, t: 0.055, rx: -0.4, ry: 0.8, rz: -0.5, sx: -0.015, sy: 0.020, sz: -0.016, c: 0x34d399 },
+      { r: 2.45, t: 0.065, rx: 0.3, ry: -0.7, rz: 0.8, sx: 0.012, sy: -0.016, sz: 0.022, c: 0x00e575 },
+      { r: 2.60, t: 0.055, rx: -0.7, ry: -0.4, rz: 0.2, sx: -0.018, sy: -0.012, sz: 0.015, c: 0x10b981 },
+      { r: 2.75, t: 0.060, rx: 0.6, ry: 0.7, rz: -0.3, sx: 0.015, sy: 0.018, sz: -0.014, c: 0x05ffa1 },
+      { r: 2.85, t: 0.050, rx: -0.5, ry: 0.4, rz: 0.7, sx: -0.014, sy: 0.016, sz: 0.020, c: 0x34d399 },
+      { r: 2.95, t: 0.065, rx: 0.8, ry: 0.2, rz: -0.6, sx: 0.011, sy: -0.018, sz: 0.014, c: 0x00e575 },
+      { r: 3.05, t: 0.055, rx: -0.3, ry: -0.8, rz: 0.4, sx: -0.016, sy: -0.015, sz: -0.018, c: 0x10b981 },
+      { r: 3.15, t: 0.060, rx: 0.4, ry: 0.9, rz: 0.1, sx: 0.013, sy: 0.022, sz: 0.011, c: 0x05ffa1 },
+      { r: 3.25, t: 0.050, rx: -0.8, ry: -0.3, rz: -0.4, sx: -0.015, sy: -0.012, sz: 0.017, c: 0x34d399 },
+      { r: 3.35, t: 0.065, rx: 0.7, ry: -0.5, rz: 0.5, sx: 0.012, sy: -0.019, sz: 0.013, c: 0x00e575 },
+      { r: 3.42, t: 0.055, rx: -0.2, ry: 0.6, rz: -0.7, sx: -0.017, sy: 0.014, sz: -0.021, c: 0x10b981 },
+      { r: 3.48, t: 0.060, rx: 0.5, ry: -0.6, rz: 0.3, sx: 0.014, sy: -0.017, sz: 0.016, c: 0x05ffa1 },
+      { r: 3.52, t: 0.050, rx: -0.6, ry: -0.7, rz: 0.8, sx: -0.013, sy: -0.015, sz: 0.019, c: 0x34d399 },
+      { r: 3.56, t: 0.065, rx: 0.2, ry: 0.8, rz: -0.2, sx: 0.016, sy: 0.021, sz: -0.012, c: 0x00e575 },
+      { r: 3.60, t: 0.055, rx: -0.7, ry: 0.3, rz: -0.5, sx: -0.014, sy: 0.013, sz: -0.017, c: 0x10b981 },
+      { r: 3.64, t: 0.060, rx: 0.8, ry: -0.2, rz: 0.7, sx: 0.011, sy: -0.018, sz: 0.015, c: 0x05ffa1 },
+      { r: 3.68, t: 0.050, rx: -0.4, ry: 0.7, rz: 0.2, sx: -0.016, sy: 0.017, sz: 0.014, c: 0x34d399 }
+    ];
+
+    const rings = [];
+    ringConfigs.forEach(cfg => {
+      const geo = new THREE.TorusGeometry(cfg.r, cfg.t, 16, 72);
+      const mat = new THREE.MeshStandardMaterial({
+        color: cfg.c, emissive: cfg.c, emissiveIntensity: 2.0, roughness: 0.2, metalness: 0.88
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.rotation.set(cfg.rx, cfg.ry, cfg.rz);
+      rings.push({ mesh, mat, spX: cfg.sx, spY: cfg.sy, spZ: cfg.sz, baseColor: new THREE.Color(cfg.c) });
+      dysonGroup.add(mesh);
+    });
+
+    // 3,200 Quantum Emerald Particle Embers
+    const pCount = 3200;
+    const positions = new Float32Array(pCount * 3);
+    const colors = new Float32Array(pCount * 3);
+    const velocities = [];
+
+    const colCore = new THREE.Color(0xf0fdf4);
+    const colEmerald = new THREE.Color(0x00e575);
+    const colDeepGreen = new THREE.Color(0x064e3b);
+
+    for (let i = 0; i < pCount; i++) {
+      const r = 1.4 + Math.random() * 2.8;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+
+      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+      positions[i * 3 + 2] = r * Math.cos(phi);
+
+      const t = (r - 1.4) / 2.8;
+      const col = new THREE.Color();
+      if (t < 0.4) col.lerpColors(colCore, colEmerald, t / 0.4);
+      else col.lerpColors(colEmerald, colDeepGreen, (t - 0.4) / 0.6);
+
+      colors[i * 3] = col.r;
+      colors[i * 3 + 1] = col.g;
+      colors[i * 3 + 2] = col.b;
+
+      velocities.push({
+        speedTheta: 0.012 + Math.random() * 0.020,
+        speedPhi: 0.006 + Math.random() * 0.012,
+        radius: r, theta, phi
+      });
+    }
+
+    const pGeo = new THREE.BufferGeometry();
+    pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    pGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const pCanvas = document.createElement('canvas');
+    pCanvas.width = 64; pCanvas.height = 64;
+    const pCtx = pCanvas.getContext('2d');
+    const pGrad = pCtx.createRadialGradient(32, 32, 2, 32, 32, 32);
+    pGrad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    pGrad.addColorStop(0.35, 'rgba(0, 229, 117, 0.85)');
+    pGrad.addColorStop(0.75, 'rgba(6, 78, 59, 0.25)');
+    pGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    pCtx.fillStyle = pGrad;
+    pCtx.fillRect(0, 0, 64, 64);
+
+    const pMat = new THREE.PointsMaterial({
+      size: 0.18,
+      map: new THREE.CanvasTexture(pCanvas),
+      vertexColors: true,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    const particles = new THREE.Points(pGeo, pMat);
+    dysonGroup.add(particles);
+
+    // Interactive Core Controls
+    let coreSpeed = 2.4;
+    let targetSpeed = 2.4;
+    let isSleep = false;
+    const clock = new THREE.Clock();
+
+    window.setCoreMode = function(mode) {
+      document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+      if (mode === 'active') {
+        targetSpeed = 2.4;
+        isSleep = false;
+        coreLight.intensity = 4.5;
+        document.getElementById('btn-active').classList.add('active');
+      } else if (mode === 'sleep') {
+        targetSpeed = 0.45;
+        isSleep = true;
+        coreLight.intensity = 1.4;
+        document.getElementById('btn-sleep').classList.add('active');
+      } else if (mode === 'listening') {
+        targetSpeed = 4.2;
+        isSleep = false;
+        coreLight.intensity = 5.8;
+        document.getElementById('btn-listening').classList.add('active');
+      }
+    };
+
+    // Mouse drag interaction
+    let isDragging = false;
+    let prevMouseX = 0, prevMouseY = 0;
+    stageContainer.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      prevMouseX = e.clientX;
+      prevMouseY = e.clientY;
+    });
+    window.addEventListener('mouseup', () => { isDragging = false; });
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        const dx = e.clientX - prevMouseX;
+        const dy = e.clientY - prevMouseY;
+        dysonGroup.rotation.y += dx * 0.01;
+        dysonGroup.rotation.x += dy * 0.01;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      }
+    });
+
+    // Animation Loop
+    function animate() {
+      requestAnimationFrame(animate);
+      const delta = Math.min(clock.getDelta(), 0.1);
+      const time = clock.getElapsedTime();
+
+      coreSpeed += (targetSpeed - coreSpeed) * delta * 3.0;
+
+      // Pulse
+      const pulse = 1.0 + Math.sin(time * 3.5) * 0.07;
+      innerCore.scale.set(pulse, pulse, pulse);
+      plasmaShell.scale.set(pulse * 1.05, pulse * 1.05, pulse * 1.05);
+      plasmaShell.rotation.y += 0.02 * coreSpeed;
+
+      // Master rotation
+      dysonGroup.rotation.y += 0.008 * coreSpeed;
+      dysonGroup.rotation.x = Math.sin(time * 0.4) * 0.15;
+
+      // Rings
+      rings.forEach(ring => {
+        ring.mesh.rotation.x += ring.spX * coreSpeed;
+        ring.mesh.rotation.y += ring.spY * coreSpeed;
+        ring.mesh.rotation.z += ring.spZ * coreSpeed;
+      });
+
+      // Particles
+      const pos = particles.geometry.attributes.position.array;
+      for (let i = 0; i < pCount; i++) {
+        const v = velocities[i];
+        v.theta += v.speedTheta * coreSpeed;
+        v.phi += v.speedPhi * coreSpeed;
+        const r = v.radius + Math.sin(time * 2.5 + i) * 0.08;
+        const idx = i * 3;
+        pos[idx] = r * Math.sin(v.phi) * Math.cos(v.theta);
+        pos[idx + 1] = r * Math.sin(v.phi) * Math.sin(v.theta);
+        pos[idx + 2] = r * Math.cos(v.phi);
+      }
+      particles.geometry.attributes.position.needsUpdate = true;
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
