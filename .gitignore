@@ -1,0 +1,17 @@
+# Pytest cache
+.pytest_cache/
+
+# Build and installer output
+dist/
+build/
+installer/dist_installer/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+
+# OS generated files
+Thumbs.db
+.DS_Store

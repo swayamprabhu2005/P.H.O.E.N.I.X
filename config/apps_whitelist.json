@@ -1,0 +1,59 @@
+{
+  "comet": {
+    "type": "executable",
+    "command": "C:\\Program Files\\Perplexity\\Comet\\Application\\comet.exe"
+  },
+  "chrome": {
+    "type": "executable",
+    "command": "chrome.exe",
+    "fallback_paths": [
+      "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+    ]
+  },
+  "edge": {
+    "type": "executable",
+    "command": "msedge.exe",
+    "fallback_paths": [
+      "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe"
+    ]
+  },
+  "notepad": {
+    "type": "executable",
+    "command": "notepad.exe"
+  },
+  "calculator": {
+    "type": "protocol",
+    "command": "calc.exe",
+    "uri": "calculator:"
+  },
+  "word": {
+    "type": "executable",
+    "command": "winword.exe"
+  },
+  "powerpoint": {
+    "type": "executable",
+    "command": "powerpnt.exe"
+  },
+  "excel": {
+    "type": "executable",
+    "command": "excel.exe"
+  },
+  "explorer": {
+    "type": "executable",
+    "command": "explorer.exe"
+  },
+  "task manager": {
+    "type": "executable",
+    "command": "taskmgr.exe"
+  },
+  "settings": {
+    "type": "protocol",
+    "command": "ms-settings:"
+  },
+  "snipping tool": {
+    "type": "executable",
+    "command": "snippingtool.exe"
+  }
+}
