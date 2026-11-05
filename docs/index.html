@@ -9,6 +9,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="three.min.js"><\/script>');
+    }
+  </script>
 
   <style>
     :root {
@@ -822,10 +827,10 @@
 
       <div class="cmd-wrapper">
         <div class="cmd-tabs">
-          <button class="tab-btn active" onclick="filterCommands('system')">System & Desktop</button>
-          <button class="tab-btn" onclick="filterCommands('apps')">Apps & Research</button>
-          <button class="tab-btn" onclick="filterCommands('google')">Google & Accounts</button>
-          <button class="tab-btn" onclick="filterCommands('files')">Files & Navigation</button>
+          <button class="tab-btn active" data-category="system" onclick="filterCommands('system', this)">System & Desktop</button>
+          <button class="tab-btn" data-category="apps" onclick="filterCommands('apps', this)">Apps & Research</button>
+          <button class="tab-btn" data-category="google" onclick="filterCommands('google', this)">Google & Accounts</button>
+          <button class="tab-btn" data-category="files" onclick="filterCommands('files', this)">Files & Navigation</button>
         </div>
 
         <div class="cmd-list" id="command-list-container">
@@ -935,11 +940,17 @@
       ]
     };
 
-    function filterCommands(category) {
+    function filterCommands(category, btn) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      event.target.classList.add('active');
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        const targetBtn = document.querySelector(`.tab-btn[data-category="${category}"]`) || document.querySelector('.tab-btn');
+        if (targetBtn) targetBtn.classList.add('active');
+      }
 
       const container = document.getElementById('command-list-container');
+      if (!container) return;
       container.innerHTML = '';
 
       const items = commandsData[category] || [];
@@ -960,30 +971,74 @@
     // -------------------------------------------------------------
     // Three.js 3D Dyson Sphere Engine (Quantum Emerald / Titanium Palette)
     // -------------------------------------------------------------
-    const stageContainer = document.getElementById('canvas-container');
-    const width = 360;
-    const height = 360;
+    let coreLight, accentLight;
+    let coreSpeed = 2.4;
+    let targetSpeed = 2.4;
+    let isSleep = false;
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 13.8);
+    window.setCoreMode = function(mode) {
+      document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-' + mode);
+      if (activeBtn) activeBtn.classList.add('active');
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setClearColor(0x000000, 0);
-    stageContainer.appendChild(renderer.domElement);
+      if (mode === 'active') {
+        targetSpeed = 2.4;
+        isSleep = false;
+        if (coreLight) coreLight.intensity = 4.5;
+        if (accentLight) accentLight.intensity = 2.5;
+      } else if (mode === 'sleep') {
+        targetSpeed = 0.45;
+        isSleep = true;
+        if (coreLight) coreLight.intensity = 1.4;
+        if (accentLight) accentLight.intensity = 0.8;
+      } else if (mode === 'listening') {
+        targetSpeed = 4.2;
+        isSleep = false;
+        if (coreLight) coreLight.intensity = 5.8;
+        if (accentLight) accentLight.intensity = 3.5;
+      }
+    };
 
-    const dysonGroup = new THREE.Group();
-    scene.add(dysonGroup);
+    function initDysonSphere() {
+      const stageContainer = document.getElementById('canvas-container');
+      if (!stageContainer) return;
+      if (typeof THREE === 'undefined') {
+        setTimeout(initDysonSphere, 50);
+        return;
+      }
 
-    // Quantum Emerald Lighting
-    scene.add(new THREE.AmbientLight(0x021208, 1.2));
-    const coreLight = new THREE.PointLight(0x00e575, 4.5, 35);
-    dysonGroup.add(coreLight);
-    const accentLight = new THREE.PointLight(0x34d399, 2.5, 25);
-    accentLight.position.set(0, 0, 2);
-    dysonGroup.add(accentLight);
+      const width = stageContainer.clientWidth || 360;
+      const height = stageContainer.clientHeight || 360;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+      camera.position.set(0, 0, 13.8);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x000000, 0);
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.borderRadius = '50%';
+      stageContainer.innerHTML = '';
+      stageContainer.appendChild(renderer.domElement);
+
+      const dysonGroup = new THREE.Group();
+      scene.add(dysonGroup);
+
+      // Quantum Emerald Lighting
+      scene.add(new THREE.AmbientLight(0x021208, 1.2));
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(5, 10, 7);
+      scene.add(dirLight);
+
+      coreLight = new THREE.PointLight(0x00e575, 4.5, 35);
+      dysonGroup.add(coreLight);
+      accentLight = new THREE.PointLight(0x34d399, 2.5, 25);
+      accentLight.position.set(0, 0, 2);
+      dysonGroup.add(accentLight);
 
     // Inner White-Platinum Core
     const innerCore = new THREE.Mesh(
@@ -1104,31 +1159,7 @@
     const particles = new THREE.Points(pGeo, pMat);
     dysonGroup.add(particles);
 
-    // Interactive Core Controls
-    let coreSpeed = 2.4;
-    let targetSpeed = 2.4;
-    let isSleep = false;
     const clock = new THREE.Clock();
-
-    window.setCoreMode = function(mode) {
-      document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
-      if (mode === 'active') {
-        targetSpeed = 2.4;
-        isSleep = false;
-        coreLight.intensity = 4.5;
-        document.getElementById('btn-active').classList.add('active');
-      } else if (mode === 'sleep') {
-        targetSpeed = 0.45;
-        isSleep = true;
-        coreLight.intensity = 1.4;
-        document.getElementById('btn-sleep').classList.add('active');
-      } else if (mode === 'listening') {
-        targetSpeed = 4.2;
-        isSleep = false;
-        coreLight.intensity = 5.8;
-        document.getElementById('btn-listening').classList.add('active');
-      }
-    };
 
     // Mouse drag interaction
     let isDragging = false;
@@ -1148,6 +1179,16 @@
         prevMouseX = e.clientX;
         prevMouseY = e.clientY;
       }
+    });
+
+    // Window resize handler
+    window.addEventListener('resize', () => {
+      if (!stageContainer) return;
+      const w = stageContainer.clientWidth || 360;
+      const h = stageContainer.clientHeight || 360;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
     });
 
     // Animation Loop
@@ -1193,6 +1234,14 @@
     }
 
     animate();
+  }
+
+  // Auto-init Dyson Sphere safely
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDysonSphere);
+  } else {
+    initDysonSphere();
+  }
   </script>
 </body>
 </html>
