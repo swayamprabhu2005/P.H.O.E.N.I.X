@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P.H.O.E.N.I.X.</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="js/three.min.js"></script>
+</head>
+<body>
+    <div id="hud-window">
+        <!-- Draggable Top Bar -->
+        <div class="hud-header">
+            <div class="hud-title-wrap">
+                <div id="status-dot" class="hud-pulse-dot"></div>
+                <span class="hud-title">P.H.O.E.N.I.X.</span>
+            </div>
+            <div class="hud-controls">
+                <button id="btn-sleep" class="hud-btn" title="Standby / Sleep">&#9790;</button>
+                <button id="btn-close" class="hud-btn" title="Hide to Tray">&#10005;</button>
+            </div>
+        </div>
+
+        <!-- 3D Holographic Core Viewport -->
+        <div id="canvas-container" title="Click core to wake up / activate voice">
+            <div id="wake-hint" class="core-wake-hint">CLICK TO WAKE</div>
+        </div>
+
+        <!-- Bottom Feedback Panel -->
+        <div class="hud-footer">
+            <div id="status-badge" class="hud-status-badge">STANDBY</div>
+            <div id="toast-msg" class="hud-toast">
+                <span id="toast-text">Click the 3D core to wake up</span>
+            </div>
+            <div id="path-indicator" class="hud-path-pill" title="Active Directory">
+                C:\
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/phoenix_core.js"></script>
+    <script src="js/hud_controller.js"></script>
+</body>
+</html>
