@@ -44,7 +44,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "startupicon"; Description: "Launch P.H.O.E.N.I.X. automatically on Windows startup"; GroupDescription: "Startup:"; Flags: unchecked
 
 [Files]
-Source: "..\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git*,.pytest_cache,tests,dist_installer"
+Source: "..\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git*,.pytest_cache,tests,dist_installer,release_files"
 Source: "phoenix.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
