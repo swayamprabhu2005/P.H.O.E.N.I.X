@@ -107,7 +107,7 @@ class PhoenixApp:
         return {}
 
     def get_user_name(self) -> str:
-        return self.config.get("user", {}).get("name", "Swayam")
+        return self.config.get("user", {}).get("name", "").strip() or "Operator"
 
     def set_user_name(self, new_name: str):
         cleaned = new_name.strip().title()

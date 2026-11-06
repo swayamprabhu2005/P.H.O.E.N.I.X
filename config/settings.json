@@ -1,18 +1,18 @@
 {
   "user": {
-    "name": "Swayam"
+    "name": ""
   },
   "assistant": {
     "name": "P.H.O.E.N.I.X.",
     "full_name": "Personalized Holographic Operator for Execution, Navigation, & Interactive eXtension",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "tts_enabled": true,
     "tts_rate": 185,
     "tts_volume": 1.0
   },
   "window": {
-    "width": 380,
-    "height": 430,
+    "width": 360,
+    "height": 360,
     "always_on_top": true,
     "frameless": true,
     "transparent": true

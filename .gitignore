@@ -12,6 +12,9 @@ build/
 installer/dist_installer/
 release_files/
 
+# Setup marker
+config/.setup_done
+
 # Virtual environments
 .env
 .venv
