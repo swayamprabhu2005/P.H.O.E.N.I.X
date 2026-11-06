@@ -193,6 +193,9 @@ class PhoenixApp:
         setup_marker = os.path.join(self.base_dir, "config", ".setup_done")
         if not os.path.exists(setup_marker) or not self.config.get("user", {}).get("name"):
             self.window_mgr.show_onboarding()
+
+        # Calibrate ambient microphone noise floor silently in background
+        threading.Thread(target=self.recognizer.calibrate_ambient_noise, args=(0.4,), daemon=True).start()
         # Normal startup is completely silent. Only greets when clicked/activated.
 
     def wake_up(self):
@@ -304,7 +307,10 @@ class PhoenixApp:
             return
 
         # Special lifecycle commands
-        if intent == "GO_TO_SLEEP":
+        if intent == "WAKE_UP":
+            self.wake_up()
+            return
+        elif intent == "GO_TO_SLEEP":
             self.go_to_sleep()
             return
         elif intent == "SHUTDOWN":

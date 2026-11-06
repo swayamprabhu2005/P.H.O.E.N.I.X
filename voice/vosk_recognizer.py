@@ -36,6 +36,9 @@ class VoskVoiceRecognizer:
         self.sample_rate = sample_rate
         self.silence_timeout = silence_timeout
         self.energy_threshold = energy_threshold
+        self.dynamic_threshold = energy_threshold
+        self.ambient_noise_level = max(50.0, energy_threshold * 0.4)
+        self._calibrated = False
         self.on_text_recognized = on_text_recognized
         self.on_partial = on_partial
         self.grammar_phrases = grammar_phrases or []
@@ -65,6 +68,37 @@ class VoskVoiceRecognizer:
         self.grammar_phrases = phrases
         self._init_recognizer(self.grammar_phrases)
 
+    def calibrate_ambient_noise(self, duration: float = 0.5):
+        """Samples ambient room noise to establish an optimal adaptive noise gate threshold."""
+        samples = []
+        try:
+            def _calib_cb(indata, frames, time_info, status):
+                s = np.frombuffer(bytes(indata), dtype=np.int16)
+                if len(s) > 0:
+                    rms = float(np.sqrt(np.mean(s.astype(float)**2)))
+                    samples.append(rms)
+
+            with sd.RawInputStream(
+                samplerate=self.sample_rate,
+                blocksize=1024,
+                dtype="int16",
+                channels=1,
+                callback=_calib_cb
+            ):
+                time.sleep(duration)
+
+            if samples:
+                avg_noise = float(np.mean(samples))
+                std_noise = float(np.std(samples))
+                calculated = max(100.0, avg_noise + 2.5 * std_noise + 75.0)
+                self.ambient_noise_level = avg_noise
+                self.dynamic_threshold = calculated
+                self.energy_threshold = calculated
+                self._calibrated = True
+                print(f"[VOSK] Ambient Noise Calibrated: Floor={avg_noise:.1f} RMS -> Dynamic Gate={calculated:.1f} RMS", flush=True)
+        except Exception as e:
+            print(f"[VOSK] Ambient calibration note: {e}", flush=True)
+
     def _audio_callback(self, indata, frames, time_info, status):
         if not self._is_listening:
             return
@@ -76,9 +110,15 @@ class VoskVoiceRecognizer:
             samples = np.frombuffer(audio_bytes, dtype=np.int16)
             rms = float(np.sqrt(np.mean(samples.astype(float)**2)))
         except Exception:
-            rms = self.energy_threshold + 10.0
+            rms = self.dynamic_threshold + 10.0
 
-        if rms >= self.energy_threshold:
+        # Slow adaptive tracking when room is quiet and no speech is in progress
+        if not self._has_detected_speech and rms < self.dynamic_threshold * 0.75:
+            self.ambient_noise_level = 0.96 * self.ambient_noise_level + 0.04 * rms
+            self.dynamic_threshold = max(100.0, self.ambient_noise_level + 90.0)
+            self.energy_threshold = self.dynamic_threshold
+
+        if rms >= self.dynamic_threshold:
             self._has_detected_speech = True
             self._last_speech_time = time.time()
             self._audio_queue.put(audio_bytes)

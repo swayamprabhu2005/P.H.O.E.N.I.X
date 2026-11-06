@@ -1,6 +1,17 @@
 {
   "intents": [
     {
+      "intent": "WAKE_UP",
+      "patterns": [
+        "wake up",
+        "activate",
+        "wake up phoenix",
+        "hey phoenix wake up"
+      ],
+      "params": {},
+      "feedback": "At your service."
+    },
+    {
       "intent": "GO_TO_SLEEP",
       "patterns": [
         "stop",

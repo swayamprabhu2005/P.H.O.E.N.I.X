@@ -4,6 +4,7 @@ import os
 import re
 from typing import Optional, Tuple, Dict, Any, List
 from commands.normalizer import CommandNormalizer
+from commands.phonetic import phrase_phonetic_distance
 
 class CommandParser:
     """Parses speech or text into structured intents and parameters, preserving parameter casing."""
@@ -69,17 +70,17 @@ class CommandParser:
                 cleaned_params = {k: v.strip(" '\"") for k, v in params.items() if v}
                 return intent, cleaned_params, feedback
 
-        # 3. Fuzzy match fallback for static commands (similarity >= 0.82)
+        # 3. Fuzzy & Phonetic Distance fallback for static commands (similarity >= 0.72)
         best_ratio = 0.0
         best_intent = None
         best_feedback = ""
         norm_lower = normalized.lower().strip()
 
         for pat, intent, feedback, param_defs in self._raw_patterns:
-            # Only fuzzy match patterns without open wildcard params (.+)
+            # Only fuzzy & phonetic match patterns without open wildcard params (.+)
             if not param_defs:
-                ratio = difflib.SequenceMatcher(None, norm_lower, pat.lower()).ratio()
-                if ratio > best_ratio and ratio >= 0.82:
+                ratio = phrase_phonetic_distance(norm_lower, pat.lower())
+                if ratio > best_ratio and ratio >= 0.72:
                     best_ratio = ratio
                     best_intent = intent
                     best_feedback = feedback

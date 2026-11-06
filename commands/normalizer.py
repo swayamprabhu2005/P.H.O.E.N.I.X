@@ -17,6 +17,26 @@ class CommandNormalizer:
     ]
 
     SYNONYMS = {
+        # Acoustic and STT phonetic confusion mappings
+        "file year": "file explorer",
+        "file here": "file explorer",
+        "file ear": "file explorer",
+        "file you": "file explorer",
+        "see drive": "c drive",
+        "sea drive": "c drive",
+        "dee drive": "d drive",
+        "the drive": "d drive",
+        "he drive": "e drive",
+        "ye drive": "e drive",
+        "crome": "chrome",
+        "google crome": "chrome",
+        "crm": "chrome",
+        "shoot down": "shutdown",
+        "shut on": "shutdown",
+        "way cup": "wake up",
+        "wait up": "wake up",
+        "send by": "standby",
+        "stand by": "standby",
         "google chrome": "chrome",
         "microsoft edge": "edge",
         "file manager": "file explorer",
