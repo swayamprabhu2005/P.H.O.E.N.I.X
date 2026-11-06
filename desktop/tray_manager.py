@@ -29,8 +29,8 @@ class SystemTrayManager:
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         candidate_paths = [
             os.path.join(base_dir, "assets", "logo.png"),
-            os.path.join(base_dir, "logo.png"),
             os.path.join(base_dir, "visual", "logo.png"),
+            os.path.join(base_dir, "assets", "phoenix.ico"),
             os.path.join(base_dir, "phoenix.ico"),
         ]
 
