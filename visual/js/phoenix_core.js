@@ -23,7 +23,7 @@ class PhoenixCore {
         this.isShockwaving = false;
 
         this.initScene();
-        this.buildNebulaBackdrop();
+        // Transparent WebGL background - no backdrop plane
         this.buildSolarCore();
         this.buildDysonRings();
         this.buildDigitalTicks();

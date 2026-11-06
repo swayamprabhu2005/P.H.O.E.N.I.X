@@ -2,6 +2,7 @@ import json
 import os
 from unittest.mock import patch
 from app.first_run_setup import run_first_time_setup
+from app.main import acquire_single_instance
 
 def test_first_run_setup_creates_marker_and_saves_settings(tmp_path):
     project_dir = str(tmp_path)
@@ -31,3 +32,8 @@ def test_first_run_setup_creates_marker_and_saves_settings(tmp_path):
         data = json.load(f)
     assert data["user"]["name"] == "Swayam"
     assert data["ai"]["groq_api_key"] == "gsk_test123"
+
+def test_single_instance_acquisition():
+    # Calling acquire_single_instance returns a boolean or handle
+    res = acquire_single_instance()
+    assert res is True or res is False

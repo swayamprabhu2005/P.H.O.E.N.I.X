@@ -1,5 +1,7 @@
 import json
 import os
+import threading
+import time
 from typing import Callable, Optional, Dict, Any
 import webview
 
@@ -68,6 +70,7 @@ class DesktopWindowManager:
         on_confirm_action: Optional[Callable[[bool, str, str, Dict[str, Any]], None]] = None,
         on_save_groq_key: Optional[Callable[[str], None]] = None,
         on_onboarding_complete: Optional[Callable[[str, str], None]] = None,
+        on_close: Optional[Callable[[], None]] = None,
         width: int = 380,
         height: int = 420
     ):
@@ -78,6 +81,7 @@ class DesktopWindowManager:
         self.on_confirm_action = on_confirm_action
         self.on_save_groq_key = on_save_groq_key
         self.on_onboarding_complete = on_onboarding_complete
+        self.on_close = on_close
         self.width = width
         self.height = height
 
@@ -92,8 +96,8 @@ class DesktopWindowManager:
         )
         self.window = None
 
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.html_path = os.path.join(base_dir, "visual", "index.html")
+        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.html_path = os.path.join(self.base_dir, "visual", "index.html")
 
     def _handle_wake(self):
         if self.on_wake:
@@ -123,6 +127,28 @@ class DesktopWindowManager:
         if self.on_onboarding_complete:
             self.on_onboarding_complete(name, groq_key)
 
+    def _apply_taskbar_icon(self):
+        """Applies high-res P.H.O.E.N.I.X. icon to Win32 window HWND so Taskbar shows official logo."""
+        try:
+            import win32gui
+            import win32con
+            ico_path = os.path.join(self.base_dir, "assets", "phoenix.ico")
+            if not os.path.exists(ico_path):
+                return
+            for _ in range(40):
+                time.sleep(0.1)
+                hwnd = win32gui.FindWindow(None, "P.H.O.E.N.I.X.")
+                if hwnd:
+                    hicon_big = win32gui.LoadImage(0, ico_path, win32con.IMAGE_ICON, 32, 32, win32con.LR_LOADFROMFILE)
+                    hicon_small = win32gui.LoadImage(0, ico_path, win32con.IMAGE_ICON, 16, 16, win32con.LR_LOADFROMFILE)
+                    if hicon_big:
+                        win32gui.SendMessage(hwnd, win32con.WM_SETICON, win32con.ICON_BIG, hicon_big)
+                    if hicon_small:
+                        win32gui.SendMessage(hwnd, win32con.WM_SETICON, win32con.ICON_SMALL, hicon_small)
+                    break
+        except Exception:
+            pass
+
     def create_window(self):
         """Creates the transparent frameless pywebview window."""
         self.window = webview.create_window(
@@ -137,6 +163,10 @@ class DesktopWindowManager:
             transparent=True,
             background_color="#000000"
         )
+        if self.on_close:
+            self.window.events.closed += self.on_close
+
+        threading.Thread(target=self._apply_taskbar_icon, daemon=True).start()
         return self.window
 
     def update_ui_state(self, state: str, message: str = "", active_path: str = ""):

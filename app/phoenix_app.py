@@ -64,6 +64,7 @@ class PhoenixApp:
             on_confirm_action=self.on_gui_confirm_action,
             on_save_groq_key=self.set_groq_key,
             on_onboarding_complete=self.on_onboarding_complete,
+            on_close=self.shutdown,
             width=win_cfg.get("width", 380),
             height=win_cfg.get("height", 420)
         )
@@ -146,8 +147,11 @@ class PhoenixApp:
         self.tray_mgr.start()
         self.window_mgr.create_window()
 
+        # Pass high-res multi-resolution icon to pywebview so Windows taskbar displays official logo
+        ico_path = os.path.join(self.base_dir, "assets", "phoenix.ico")
+
         # Run webview GUI loop (blocking main thread)
-        webview.start(self._on_webview_ready, gui="edgechromium")
+        webview.start(self._on_webview_ready, gui="edgechromium", icon=ico_path)
 
     def on_onboarding_complete(self, name: str, groq_key: str):
         chosen_name = name.strip().title() if name.strip() else "Operator"
@@ -181,18 +185,15 @@ class PhoenixApp:
         self.tts.speak(f"Personalization complete. At your service, {chosen_name}.")
 
     def _on_webview_ready(self):
-        """Called once the pywebview window is loaded."""
+        """Called once the pywebview window is loaded. Starts silently in standby."""
         time.sleep(0.4)
         curr_dir = self.navigator.get_current_directory()
         self.window_mgr.update_ui_state("standby", "", curr_dir)
 
         setup_marker = os.path.join(self.base_dir, "config", ".setup_done")
-        user_name = self.get_user_name()
         if not os.path.exists(setup_marker) or not self.config.get("user", {}).get("name"):
             self.window_mgr.show_onboarding()
-            self.tts.speak("Welcome to Phoenix. Please configure your operator credentials.")
-        else:
-            self.tts.speak(f"At your service, {user_name}.")
+        # Normal startup is completely silent. Only greets when clicked/activated.
 
     def wake_up(self):
         """Awakens assistant upon clicking the 3D core and starts voice capture."""
@@ -227,12 +228,36 @@ class PhoenixApp:
         self.window_mgr.show()
 
     def shutdown(self):
+        if not self._running:
+            return
         self._running = False
-        self.tts.speak("Shutting down Phoenix.")
-        self.recognizer.stop_listening()
-        self.tray_mgr.stop()
-        self.window_mgr.destroy()
-        sys.exit(0)
+
+        try:
+            self.recognizer.stop_listening()
+        except Exception:
+            pass
+
+        try:
+            self.tray_mgr.stop()
+        except Exception:
+            pass
+
+        try:
+            self.window_mgr.destroy()
+        except Exception:
+            pass
+
+        # Speak shutdown feedback and cleanly terminate OS process
+        try:
+            self.tts.speak("Shutting down Phoenix.")
+        except Exception:
+            pass
+
+        def _terminate():
+            time.sleep(0.6)
+            os._exit(0)
+
+        threading.Thread(target=_terminate, daemon=True).start()
 
     def on_partial_recognized(self, partial_text: str):
         if self.state_mgr.current_state == AppState.LISTENING and partial_text:

@@ -75,4 +75,9 @@ class SystemTrayManager:
 
     def stop(self):
         if self.icon:
-            self.icon.stop()
+            try:
+                self.icon.visible = False
+                self.icon.stop()
+            except Exception:
+                pass
+            self.icon = None
