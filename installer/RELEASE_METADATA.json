@@ -1,7 +1,7 @@
 {
-  "tag_name": "v1.0.0",
+  "tag_name": "v1.1.0",
   "target_commitish": "main",
-  "name": "P.H.O.E.N.I.X. v1.0.0 — Offline Windows AI Assistant",
+  "name": "P.H.O.E.N.I.X. v1.1.0 — Windows Desktop AI Agent",
   "draft": false,
   "prerelease": false,
   "assets": [
@@ -11,6 +11,6 @@
       "label": "P.H.O.E.N.I.X. Windows Standalone Setup Installer"
     }
   ],
-  "website_url": "https://swayam.github.io/phoenix/",
-  "download_url": "https://github.com/swayam/phoenix/releases/latest/download/PHOENIX_Setup.exe"
+  "website_url": "https://swayamprabhu2005.github.io/P.H.O.E.N.I.X./",
+  "download_url": "https://github.com/swayamprabhu2005/P.H.O.E.N.I.X./releases/latest/download/PHOENIX_Setup.exe"
 }

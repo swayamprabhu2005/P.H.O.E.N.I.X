@@ -86,7 +86,7 @@ class DesktopWindowManager:
             easy_drag=True,
             on_top=True,
             transparent=True,
-            background_color="#00000000"
+            background_color="#000000"
         )
         return self.window
 

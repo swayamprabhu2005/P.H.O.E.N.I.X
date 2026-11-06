@@ -1,3 +1,4 @@
+import os
 import threading
 from typing import Callable, Optional
 from PIL import Image, ImageDraw
@@ -24,7 +25,24 @@ class SystemTrayManager:
         self._thread = None
 
     def _create_icon_image(self) -> Image.Image:
-        """Generates a fiery glowing orb icon for the tray."""
+        """Loads the official P.H.O.E.N.I.X. logo or generates fallback fiery orb."""
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        candidate_paths = [
+            os.path.join(base_dir, "assets", "logo.png"),
+            os.path.join(base_dir, "logo.png"),
+            os.path.join(base_dir, "visual", "logo.png"),
+            os.path.join(base_dir, "phoenix.ico"),
+        ]
+
+        for path in candidate_paths:
+            if os.path.exists(path):
+                try:
+                    with Image.open(path) as img:
+                        return img.convert("RGBA").resize((64, 64), Image.Resampling.LANCZOS)
+                except Exception:
+                    pass
+
+        # Fallback procedural icon
         img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
 

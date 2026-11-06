@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#00e575">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="shortcut icon" href="favicon.ico">
   <title>P.H.O.E.N.I.X. — Offline Windows Desktop AI Assistant</title>
   <meta name="description" content="P.H.O.E.N.I.X. is a lightweight, 100% offline Windows desktop AI assistant with a floating 3D holographic Dyson Sphere, voice-controlled OS automation, and silent ambient speech filtering.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -94,6 +96,45 @@
       justify-content: space-between;
       align-items: center;
       height: 72px;
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      filter: drop-shadow(0 0 8px var(--emerald-glow));
+    }
+
+    .hero-badge-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .hero-logo-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--emerald-border-bright);
+      box-shadow: 0 0 20px var(--emerald-glow);
+    }
+
+    .download-logo-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .download-logo {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--emerald-border-bright);
+      box-shadow: 0 0 35px var(--emerald-glow);
     }
 
     .brand {
@@ -694,6 +735,7 @@
   <header>
     <div class="container nav-wrap">
       <a href="#" class="brand">
+        <img src="logo.png" alt="P.H.O.E.N.I.X. Logo" class="brand-logo">
         <span class="status-dot"></span>
         <span>P.H.O.E.N.I.X.</span>
       </a>
@@ -708,7 +750,7 @@
 
       <a href="#download" class="nav-cta">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-        <span>Download v1.0.0</span>
+        <span>Download v1.1.0</span>
       </a>
     </div>
   </header>
@@ -717,8 +759,11 @@
   <div class="container">
     <div class="hero">
       <div class="hero-content">
-        <div class="badge">
-          <span>●</span> Offline Windows AI Assistant • v1.0.0
+        <div class="hero-badge-wrap">
+          <img src="logo.png" alt="P.H.O.E.N.I.X. Logo" class="hero-logo-img">
+          <div class="badge">
+            <span>●</span> Offline Windows AI Assistant • v1.1.0
+          </div>
         </div>
 
         <h1>Voice-Powered Desktop Automation. Zero Cloud Required.</h1>
@@ -845,13 +890,16 @@
   <section id="download">
     <div class="container">
       <div class="download-card">
+        <div class="download-logo-wrap">
+          <img src="logo.png" alt="P.H.O.E.N.I.X. Logo" class="download-logo">
+        </div>
         <div class="badge" style="margin: 0 auto 16px auto;">Windows Desktop Release</div>
-        <h2>Get P.H.O.E.N.I.X. v1.0.0</h2>
-        <p>Download the official standalone Windows setup installer. Pre-packaged, ready to launch with zero manual setup.</p>
+        <h2>Get P.H.O.E.N.I.X. v1.1.0</h2>
+        <p>Download the official standalone Windows setup installer. Pre-packaged, ready to launch with zero manual setup. Now supports seamless installation across any drive (C:, D:, E:) and custom directory.</p>
 
         <a href="https://github.com/swayamprabhu2005/P.H.O.E.N.I.X./releases/latest/download/PHOENIX_Setup.exe" class="btn-primary" style="margin: 0 auto; display: inline-flex;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.551H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.951-1.801"/></svg>
-          <span>Download PHOENIX_Setup.exe (v1.0.0)</span>
+          <span>Download PHOENIX_Setup.exe (v1.1.0)</span>
         </a>
 
         <div class="smartscreen-alert">
@@ -869,7 +917,7 @@
           <div class="step-item">
             <div class="step-num">2</div>
             <h4>Run Setup Wizard</h4>
-            <p>Select your install path and choose your desktop shortcut preferences.</p>
+            <p>Select your preferred install folder on any drive (C:, D:, etc.) or install mode.</p>
           </div>
 
           <div class="step-item">
