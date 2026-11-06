@@ -155,11 +155,13 @@ class CommandExecutor:
             return ok, f"Opened Explorer at {curr_dir}", "Opening File Explorer."
 
         elif intent == "NAVIGATE_DRIVE":
-            drive = params.get("drive", "C")
+            drive = params.get("drive", "C").upper().strip()
+            if drive not in ["C", "D", "E"]:
+                return False, "Only C, D, and E drives are supported", "Only C, D, and E drives are supported."
             ok = self.navigator.navigate_drive(drive)
             if ok:
-                return True, f"Navigated to {drive.upper()}:\\", f"Navigated to {drive.upper()} drive."
-            return False, f"Drive {drive.upper()}: not found", f"{drive.upper()} drive not available."
+                return True, f"Navigated to {drive}:\\", f"Navigated to {drive} drive."
+            return False, f"Drive {drive}: not found", f"{drive} drive not available."
 
         elif intent == "OPEN_FOLDER":
             name = params.get("name", "")
@@ -316,6 +318,20 @@ class CommandExecutor:
             return True, "Desktop system without battery", "No battery detected."
 
         # 12. Custom Dynamic Actions added via tools/add_feature.py
+        elif intent == "SET_GROQ_KEY":
+            key = params.get("key", "").strip()
+            if key and os.path.exists(self.settings_path):
+                try:
+                    with open(self.settings_path, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    data.setdefault("ai", {})["groq_api_key"] = key
+                    with open(self.settings_path, "w", encoding="utf-8") as f:
+                        json.dump(data, f, indent=2)
+                    return True, "Groq API key saved", "Groq API key updated."
+                except Exception as e:
+                    return False, f"Failed to save Groq key: {e}", "Could not save Groq API key."
+            return False, "Invalid API key", "Invalid Groq API key."
+
         elif intent.startswith("CUSTOM_"):
             return True, f"Executed custom automation: {intent}", feedback_template
 

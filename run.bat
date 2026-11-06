@@ -1,9 +1,12 @@
 @echo off
 title P.H.O.E.N.I.X. Desktop Assistant
-echo =========================================================
-echo   Starting P.H.O.E.N.I.X. Holographic Desktop Agent...
-echo =========================================================
 cd /d "%~dp0"
+
+where pythonw >nul 2>&1
+if not errorlevel 1 (
+    start "" pythonw app\main.py
+    exit /b
+)
 
 where python >nul 2>&1
 if errorlevel 1 (
@@ -13,16 +16,5 @@ if errorlevel 1 (
     exit /b
 )
 
-REM Verify dependencies and install if missing
-python -c "import pywebview, vosk, sounddevice, pyttsx3" >nul 2>&1
-if errorlevel 1 (
-    echo Installing required packages for P.H.O.E.N.I.X...
-    pip install pywebview pystray vosk sounddevice pyttsx3 pywin32 python-docx python-pptx pillow psutil
-)
-
-python app\main.py
-if errorlevel 1 (
-    echo.
-    echo Application stopped. Press any key to exit.
-    pause
-)
+start "" python app\main.py
+exit /b

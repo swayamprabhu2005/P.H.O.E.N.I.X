@@ -1,98 +1,139 @@
 /**
- * HUD Controller (v3.0)
- * Connects the HTML/CSS HUD overlay with the Three.js PhoenixCore and the Python PyWebView API.
- * Supports smooth state transitions, awake (Amber) vs sleep (Ultron Blue) UI modes,
- * and click-to-wake interaction.
+ * HUD Controller (v3.1)
+ * Connects the HTML/CSS HUD overlay with Three.js PhoenixCore and the Python PyWebView API.
+ * Features 100% transparent floating holographic HUD with on-demand disambiguation dialog.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Initialize Three.js 3D Core
+    // 1. Initialize Three.js 3D Holographic Core
     const phoenixCore = new PhoenixCore('canvas-container');
 
     // DOM Elements
     const canvasContainer = document.getElementById('canvas-container');
-    const statusDot = document.getElementById('status-dot');
-    const statusBadge = document.getElementById('status-badge');
-    const toastText = document.getElementById('toast-text');
-    const pathIndicator = document.getElementById('path-indicator');
     const wakeHint = document.getElementById('wake-hint');
-    const btnSleep = document.getElementById('btn-sleep');
-    const btnClose = document.getElementById('btn-close');
+    const confirmCard = document.getElementById('confirmation-card');
+    const dialogPrompt = document.getElementById('dialog-prompt');
+    const dialogTarget = document.getElementById('dialog-target');
+    const dialogInput = document.getElementById('dialog-input');
+    const btnYes = document.getElementById('btn-dialog-yes');
+    const btnNo = document.getElementById('btn-dialog-no');
 
-    // 2. Click 3D Core to Wake Up
-    canvasContainer.addEventListener('click', () => {
+    let currentActionType = '';
+    let currentActionData = {};
+    let currentState = 'standby';
+
+    // 2. Click 3D Core to Wake / Toggle Sleep
+    let clickTimeout = null;
+    canvasContainer.addEventListener('click', (e) => {
+        // Ignore if clicking the dialog
+        if (confirmCard && confirmCard.contains(e.target)) return;
+
         if (window.pywebview && window.pywebview.api) {
-            window.pywebview.api.wake_up();
-        } else {
-            // Standalone browser preview fallback
-            window.updateState('listening', 'Listening for command...', 'C:\\Users\\Desktop');
+            if (currentState === 'standby') {
+                window.pywebview.api.wake_up();
+            } else {
+                window.pywebview.api.go_to_sleep();
+            }
         }
     });
 
-    // 3. Sleep / Standby Button
-    btnSleep.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (window.pywebview && window.pywebview.api) {
-            window.pywebview.api.go_to_sleep();
-        } else {
-            window.updateState('standby', 'Entering sleep mode...', 'C:\\Users\\Desktop');
-        }
-    });
-
-    // 4. Hide Window (Minimize to tray)
-    btnClose.addEventListener('click', (e) => {
-        e.stopPropagation();
+    // Right-click core to hide to tray
+    canvasContainer.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
         if (window.pywebview && window.pywebview.api) {
             window.pywebview.api.hide_window();
         }
     });
 
-    // 5. Global API exposed for Python to call
+    // 3. Holographic Disambiguation Dialog Handlers
+    function submitDialog(confirmed) {
+        if (!confirmed) {
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.confirm_action) {
+                window.pywebview.api.confirm_action(false, '', currentActionType, JSON.stringify(currentActionData));
+            }
+            window.hideConfirmationDialog();
+            return;
+        }
+
+        const typed = dialogInput.value.trim();
+        const finalText = typed ? typed : dialogTarget.textContent.trim();
+
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.confirm_action) {
+            window.pywebview.api.confirm_action(true, finalText, currentActionType, JSON.stringify(currentActionData));
+        }
+        window.hideConfirmationDialog();
+    }
+
+    btnYes.addEventListener('click', (e) => {
+        e.stopPropagation();
+        submitDialog(true);
+    });
+
+    btnNo.addEventListener('click', (e) => {
+        e.stopPropagation();
+        submitDialog(false);
+    });
+
+    dialogInput.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Enter') {
+            submitDialog(true);
+        } else if (e.key === 'Escape') {
+            submitDialog(false);
+        }
+    });
+
+    // 4. Global API exposed for Python to call
     window.updateState = function(state, message, activePath) {
+        currentState = state;
         phoenixCore.setState(state);
 
-        statusBadge.textContent = state.toUpperCase();
-        statusBadge.className = 'hud-status-badge ' + state;
-
-        if (state === 'listening') {
+        if (state === 'listening' || state === 'processing' || state === 'executing') {
             document.body.classList.remove('sleep-mode');
-            statusDot.classList.add('active');
-            wakeHint.classList.add('hidden');
+            if (wakeHint) wakeHint.classList.add('hidden');
         } else if (state === 'standby') {
             document.body.classList.add('sleep-mode');
-            statusDot.classList.remove('active');
-            wakeHint.classList.remove('hidden');
-        } else if (state === 'processing') {
-            document.body.classList.remove('sleep-mode');
-            statusDot.classList.add('active');
-            wakeHint.classList.add('hidden');
-        }
-
-        if (message) {
-            toastText.textContent = message;
-        }
-
-        if (activePath) {
-            pathIndicator.textContent = activePath;
         }
     };
 
     window.showFeedback = function(cmdText, resultText, isSuccess) {
-        if (cmdText && resultText) {
-            toastText.innerHTML = `<span class="toast-cmd">"${cmdText}"</span> &rarr; ${resultText}`;
-        } else if (resultText) {
-            toastText.textContent = resultText;
-        }
-
         if (isSuccess) {
             phoenixCore.triggerSuccessShockwave();
         }
+    };
+
+    window.showConfirmationDialog = function(promptText, targetText, actionType, actionData) {
+        currentActionType = actionType || '';
+        currentActionData = actionData || {};
+
+        dialogPrompt.textContent = promptText || 'Did you mean:';
+        dialogTarget.textContent = targetText || '';
+        dialogInput.value = '';
+
+        confirmCard.classList.remove('hidden');
+        confirmCard.style.display = 'flex';
+        confirmCard.style.opacity = '1';
+        confirmCard.style.pointerEvents = 'auto';
+
+        // Auto-focus manual input
+        setTimeout(() => {
+            dialogInput.focus();
+        }, 100);
+    };
+
+    window.hideConfirmationDialog = function() {
+        confirmCard.classList.add('hidden');
+        confirmCard.style.display = 'none';
+        confirmCard.style.opacity = '0';
+        confirmCard.style.pointerEvents = 'none';
+        currentActionType = '';
+        currentActionData = {};
     };
 
     window.setAudioLevel = function(level) {
         phoenixCore.setAudioLevel(level);
     };
 
-    // Set initial state as standby (sleep)
+    // Set initial state as standby (sleep mode, Ultron blue)
     window.updateState('standby', 'Click core to wake up', 'C:\\');
 });

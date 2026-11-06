@@ -1,7 +1,8 @@
+import difflib
 import json
 import os
 import re
-from typing import Optional, Tuple, Dict, Any
+from typing import Optional, Tuple, Dict, Any, List
 from commands.normalizer import CommandNormalizer
 
 class CommandParser:
@@ -15,6 +16,7 @@ class CommandParser:
         self.registry_path = registry_path
         self.intents = []
         self._compiled_rules = []
+        self._raw_patterns = []  # For fuzzy matching
         self._load_registry()
 
     def _load_registry(self):
@@ -23,6 +25,7 @@ class CommandParser:
 
         self.intents = data.get("intents", [])
         self._compiled_rules = []
+        self._raw_patterns = []
 
         for item in self.intents:
             intent = item["intent"]
@@ -31,6 +34,7 @@ class CommandParser:
             feedback = item.get("feedback", "")
 
             for pat in patterns:
+                self._raw_patterns.append((pat, intent, feedback, param_defs))
                 # Convert pattern string with placeholders like {name} into regex
                 regex_str = "^" + re.escape(pat) + "$"
                 for param_name, param_regex in param_defs.items():
@@ -44,7 +48,7 @@ class CommandParser:
         if not text:
             return None, {}, ""
 
-        # First, try matching directly against stripped text to preserve original parameter casing
+        # 1. Direct match on cleaned raw text
         cleaned_raw = text.strip()
         for prefix in CommandNormalizer.FILLER_PREFIXES:
             cleaned_raw = re.sub(prefix, "", cleaned_raw, flags=re.IGNORECASE).strip()
@@ -56,7 +60,7 @@ class CommandParser:
                 cleaned_params = {k: v.strip(" '\"") for k, v in params.items() if v}
                 return intent, cleaned_params, feedback
 
-        # Fallback to normalized text
+        # 2. Fallback to normalized text
         normalized = CommandNormalizer.normalize(text)
         for regex, intent, feedback in self._compiled_rules:
             match = regex.match(normalized)
@@ -65,4 +69,64 @@ class CommandParser:
                 cleaned_params = {k: v.strip(" '\"") for k, v in params.items() if v}
                 return intent, cleaned_params, feedback
 
+        # 3. Fuzzy match fallback for static commands (similarity >= 0.82)
+        best_ratio = 0.0
+        best_intent = None
+        best_feedback = ""
+        norm_lower = normalized.lower().strip()
+
+        for pat, intent, feedback, param_defs in self._raw_patterns:
+            # Only fuzzy match patterns without open wildcard params (.+)
+            if not param_defs:
+                ratio = difflib.SequenceMatcher(None, norm_lower, pat.lower()).ratio()
+                if ratio > best_ratio and ratio >= 0.82:
+                    best_ratio = ratio
+                    best_intent = intent
+                    best_feedback = feedback
+
+        if best_intent:
+            return best_intent, {}, best_feedback
+
         return None, {}, "Command not recognized."
+
+    def get_grammar_phrases(self) -> List[str]:
+        """Extracts expanded phrase list for Vosk constrained grammar."""
+        phrases = set()
+
+        for item in self.intents:
+            patterns = item.get("patterns", [])
+            param_defs = item.get("params", {})
+
+            for pat in patterns:
+                pat_lower = pat.lower().strip()
+                if not param_defs:
+                    phrases.add(pat_lower)
+                elif "{app}" in pat_lower:
+                    apps = ["chrome", "edge", "comet", "notepad", "calculator", "word", "powerpoint", "excel", "task manager", "settings", "snipping tool"]
+                    for app in apps:
+                        phrases.add(pat_lower.replace("{app}", app))
+                elif "{drive}" in pat_lower:
+                    drives = ["c", "d", "e"]
+                    for drive in drives:
+                        phrases.add(pat_lower.replace("{drive}", drive))
+                elif "{name}" in pat_lower or "{query}" in pat_lower or "{key}" in pat_lower:
+                    # Add base action words
+                    base_prefix = re.sub(r"\{.*?\}", "", pat_lower).strip()
+                    if base_prefix:
+                        phrases.add(base_prefix)
+
+        # Essential short commands and confirmations
+        essential = [
+            "c drive", "d drive", "e drive",
+            "open c drive", "open d drive", "open e drive",
+            "go to c drive", "go to d drive", "go to e drive",
+            "open chrome", "launch chrome", "start chrome",
+            "open file explorer", "open explorer", "open this pc",
+            "yes", "yeah", "yep", "correct", "confirm", "proceed", "sure",
+            "no", "nope", "cancel", "stop", "abort",
+            "standby", "sleep", "wake up", "close phoenix", "shutdown",
+            "search", "google", "find"
+        ]
+        phrases.update(essential)
+
+        return sorted(list(phrases))

@@ -3,9 +3,14 @@ import os
 import queue
 import threading
 import time
-from typing import Callable, Optional
+from typing import Callable, Optional, List
+import numpy as np
 import sounddevice as sd
+import vosk
 from vosk import Model, KaldiRecognizer
+
+# Completely silence Kaldi C++ engine debug logs
+vosk.SetLogLevel(-1)
 
 class VoskVoiceRecognizer:
     """Manages microphone audio capture and offline streaming speech recognition with Vosk."""
@@ -15,6 +20,8 @@ class VoskVoiceRecognizer:
         model_path: Optional[str] = None,
         sample_rate: int = 16000,
         silence_timeout: float = 1.2,
+        energy_threshold: float = 250.0,
+        grammar_phrases: Optional[List[str]] = None,
         on_text_recognized: Optional[Callable[[str], None]] = None,
         on_partial: Optional[Callable[[str], None]] = None
     ):
@@ -28,11 +35,13 @@ class VoskVoiceRecognizer:
         self.model_path = model_path
         self.sample_rate = sample_rate
         self.silence_timeout = silence_timeout
+        self.energy_threshold = energy_threshold
         self.on_text_recognized = on_text_recognized
         self.on_partial = on_partial
+        self.grammar_phrases = grammar_phrases or []
 
         self.model = Model(self.model_path)
-        self.recognizer = KaldiRecognizer(self.model, self.sample_rate)
+        self._init_recognizer(self.grammar_phrases)
 
         self._audio_queue = queue.Queue()
         self._is_listening = False
@@ -41,11 +50,42 @@ class VoskVoiceRecognizer:
         self._last_speech_time = 0.0
         self._has_detected_speech = False
 
+    def _init_recognizer(self, grammar_phrases: List[str]):
+        """Initializes or resets KaldiRecognizer with constrained grammar and unknown token."""
+        if grammar_phrases:
+            clean_list = sorted(list(set([p.lower().strip() for p in grammar_phrases if p.strip()])))
+            if "[unk]" not in clean_list:
+                clean_list.append("[unk]")
+            self.recognizer = KaldiRecognizer(self.model, self.sample_rate, json.dumps(clean_list))
+        else:
+            self.recognizer = KaldiRecognizer(self.model, self.sample_rate)
+
+    def set_grammar(self, phrases: List[str]):
+        """Updates the grammar dictionary dynamically."""
+        self.grammar_phrases = phrases
+        self._init_recognizer(self.grammar_phrases)
+
     def _audio_callback(self, indata, frames, time_info, status):
-        if status:
-            print(f"Audio status: {status}", flush=True)
-        if self._is_listening:
-            self._audio_queue.put(bytes(indata))
+        if not self._is_listening:
+            return
+
+        audio_bytes = bytes(indata)
+
+        # RMS Energy Noise Gate: Discard low-energy background room/breathing noise
+        try:
+            samples = np.frombuffer(audio_bytes, dtype=np.int16)
+            rms = float(np.sqrt(np.mean(samples.astype(float)**2)))
+        except Exception:
+            rms = self.energy_threshold + 10.0
+
+        if rms >= self.energy_threshold:
+            self._has_detected_speech = True
+            self._last_speech_time = time.time()
+            self._audio_queue.put(audio_bytes)
+        elif self._has_detected_speech:
+            # Trailing audio after speech to allow sentence closure
+            if time.time() - self._last_speech_time <= self.silence_timeout:
+                self._audio_queue.put(audio_bytes)
 
     def start_listening(self):
         """Activates microphone and starts processing audio stream."""
@@ -100,7 +140,7 @@ class VoskVoiceRecognizer:
                 if self._has_detected_speech and (time.time() - self._last_speech_time > self.silence_timeout):
                     final_res = json.loads(self.recognizer.FinalResult())
                     text = final_res.get("text", "").strip()
-                    if text and self.on_text_recognized:
+                    if text and text != "[unk]" and self.on_text_recognized:
                         self.on_text_recognized(text)
                     self.recognizer.Reset()
                     self._has_detected_speech = False
@@ -109,14 +149,14 @@ class VoskVoiceRecognizer:
             if self.recognizer.AcceptWaveform(data):
                 res = json.loads(self.recognizer.Result())
                 text = res.get("text", "").strip()
-                if text:
+                if text and text != "[unk]":
                     self._has_detected_speech = False
                     if self.on_text_recognized:
                         self.on_text_recognized(text)
             else:
                 partial = json.loads(self.recognizer.PartialResult())
                 partial_text = partial.get("partial", "").strip()
-                if partial_text:
+                if partial_text and partial_text != "[unk]":
                     self._has_detected_speech = True
                     self._last_speech_time = time.time()
                     if self.on_partial:

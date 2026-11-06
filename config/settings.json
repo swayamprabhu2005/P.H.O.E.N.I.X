@@ -22,7 +22,11 @@
     "model_path": "models/vosk-model-small-en-us-0.15",
     "sample_rate": 16000,
     "silence_timeout_seconds": 1.2,
-    "energy_threshold": 300
+    "energy_threshold": 250
+  },
+  "ai": {
+    "groq_api_key": "",
+    "groq_model": "llama-3.3-70b-versatile"
   },
   "visual": {
     "target_fps": 60,

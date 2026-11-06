@@ -1,0 +1,40 @@
+{
+  "visited_websites": [
+    {
+      "url": "https://chatgpt.com",
+      "name": "ChatGPT",
+      "keywords": ["chatgpt", "chat gpt", "openai", "open ai"],
+      "visits": 10
+    },
+    {
+      "url": "https://www.youtube.com",
+      "name": "YouTube",
+      "keywords": ["youtube", "you tube", "video"],
+      "visits": 5
+    },
+    {
+      "url": "https://github.com",
+      "name": "GitHub",
+      "keywords": ["github", "git hub", "git"],
+      "visits": 5
+    },
+    {
+      "url": "https://www.google.com",
+      "name": "Google",
+      "keywords": ["google", "search"],
+      "visits": 5
+    },
+    {
+      "url": "https://www.perplexity.ai",
+      "name": "Perplexity",
+      "keywords": ["perplexity", "perplexity ai"],
+      "visits": 4
+    }
+  ],
+  "recent_searches": [
+    "ChatGPT",
+    "Python documentation",
+    "GitHub trending"
+  ],
+  "recent_files": []
+}

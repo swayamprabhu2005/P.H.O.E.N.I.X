@@ -2,291 +2,580 @@
   "intents": [
     {
       "intent": "GO_TO_SLEEP",
-      "patterns": ["stop", "go to sleep", "sleep", "standby", "rest"],
+      "patterns": [
+        "stop",
+        "go to sleep",
+        "sleep",
+        "standby",
+        "rest"
+      ],
       "params": {},
       "feedback": "Entering standby."
     },
     {
       "intent": "SHUTDOWN",
-      "patterns": ["shutdown", "exit", "close phoenix", "quit", "terminate phoenix"],
+      "patterns": [
+        "shutdown",
+        "exit",
+        "close phoenix",
+        "quit",
+        "terminate phoenix"
+      ],
       "params": {},
       "feedback": "Shutting down Phoenix."
     },
     {
       "intent": "CHANGE_USER_NAME",
-      "patterns": ["call me {name}", "change my name to {name}", "my name is {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "call me {name}",
+        "change my name to {name}",
+        "my name is {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Understood. I will address you as {name}."
     },
     {
       "intent": "OPEN_CMD",
-      "patterns": ["open command prompt", "open cmd", "launch command prompt", "start cmd"],
+      "patterns": [
+        "open command prompt",
+        "open cmd",
+        "launch command prompt",
+        "start cmd"
+      ],
       "params": {},
       "feedback": "Opening Command Prompt."
     },
     {
       "intent": "OPEN_POWERSHELL",
-      "patterns": ["open powershell", "launch powershell", "start powershell"],
+      "patterns": [
+        "open powershell",
+        "launch powershell",
+        "start powershell"
+      ],
       "params": {},
       "feedback": "Opening PowerShell."
     },
     {
       "intent": "CODING_MODE_VSCODE",
-      "patterns": ["coding mode vs code", "coding mode vscode", "open vs code", "open visual studio code"],
+      "patterns": [
+        "coding mode vs code",
+        "coding mode vscode",
+        "open vs code",
+        "open visual studio code"
+      ],
       "params": {},
       "feedback": "Coding mode VS Code activated."
     },
     {
       "intent": "CODING_MODE_ANTIGRAVITY",
-      "patterns": ["coding mode antigravity", "open antigravity", "launch antigravity"],
+      "patterns": [
+        "coding mode antigravity",
+        "open antigravity",
+        "launch antigravity"
+      ],
       "params": {},
       "feedback": "Coding mode Antigravity activated."
     },
     {
       "intent": "LEARNING_MODE_CHATGPT",
-      "patterns": ["learning mode chatgpt", "open chatgpt", "launch chatgpt"],
+      "patterns": [
+        "learning mode chatgpt",
+        "open chatgpt",
+        "launch chatgpt"
+      ],
       "params": {},
       "feedback": "Opening ChatGPT."
     },
     {
       "intent": "LEARNING_MODE_PERPLEXITY",
-      "patterns": ["learning mode perplexity", "meeting mode perplexity", "open perplexity"],
+      "patterns": [
+        "learning mode perplexity",
+        "meeting mode perplexity",
+        "open perplexity"
+      ],
       "params": {},
       "feedback": "Opening Perplexity on Comet Browser."
     },
     {
       "intent": "OPEN_EMAIL",
-      "patterns": ["open email", "open gmail", "check email", "go to email", "open mail"],
+      "patterns": [
+        "open email",
+        "open gmail",
+        "check email",
+        "go to email",
+        "open mail"
+      ],
       "params": {},
       "feedback": "Opening Gmail."
     },
     {
       "intent": "OPEN_GOOGLE_DRIVE",
-      "patterns": ["open google drive", "open drive", "go to google drive", "google drive sign in"],
+      "patterns": [
+        "open google drive",
+        "open drive",
+        "go to google drive",
+        "google drive sign in"
+      ],
       "params": {},
       "feedback": "Opening Google Drive."
     },
     {
       "intent": "SWITCH_GOOGLE_ACCOUNT_NUM",
-      "patterns": ["switch to account {num}", "switch account {num}", "account {num}"],
-      "params": {"num": "\\d+"},
+      "patterns": [
+        "switch to account {num}",
+        "switch account {num}",
+        "account {num}"
+      ],
+      "params": {
+        "num": "\\d+"
+      },
       "feedback": "Switching to account {num}."
     },
     {
       "intent": "SWITCH_GOOGLE_ACCOUNT_CHOOSER",
-      "patterns": ["switch account", "switch google account", "choose account", "account chooser"],
+      "patterns": [
+        "switch account",
+        "switch google account",
+        "choose account",
+        "account chooser"
+      ],
       "params": {},
       "feedback": "Opening Google account chooser."
     },
     {
       "intent": "OPEN_PDF_FILE",
-      "patterns": ["open pdf {name}", "open pdf file {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "open pdf {name}",
+        "open pdf file {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Opening PDF {name}."
     },
     {
       "intent": "OPEN_WORD_FILE",
-      "patterns": ["open word {name}", "open word file {name}", "open document {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "open word {name}",
+        "open word file {name}",
+        "open document {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Opening Word document {name}."
     },
     {
       "intent": "OPEN_TXT_FILE",
-      "patterns": ["open text {name}", "open text file {name}", "open txt {name}", "open txt file {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "open text {name}",
+        "open text file {name}",
+        "open txt {name}",
+        "open txt file {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Opening text file {name}."
     },
     {
       "intent": "OPEN_PPT_FILE",
-      "patterns": ["open presentation {name}", "open presentation file {name}", "open ppt {name}", "open pptx {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "open presentation {name}",
+        "open presentation file {name}",
+        "open ppt {name}",
+        "open pptx {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Opening presentation {name}."
     },
     {
       "intent": "OPEN_EXPLORER",
-      "patterns": ["open file explorer", "open explorer", "open this pc", "launch explorer"],
+      "patterns": [
+        "open file explorer",
+        "open explorer",
+        "open this pc",
+        "launch explorer"
+      ],
       "params": {},
       "feedback": "Opening File Explorer."
     },
     {
       "intent": "NAVIGATE_DRIVE",
-      "patterns": ["go to {drive} drive", "open {drive} drive", "switch to {drive} drive"],
-      "params": {"drive": "\\b([a-zA-Z])\\b"},
+      "patterns": [
+        "go to {drive} drive",
+        "open {drive} drive",
+        "switch to {drive} drive",
+        "{drive} drive",
+        "drive {drive}"
+      ],
+      "params": {
+        "drive": "(c|d|e|C|D|E)"
+      },
       "feedback": "Navigating to {drive} drive."
     },
     {
       "intent": "OPEN_FOLDER",
-      "patterns": ["open folder {name}", "go to folder {name}", "go inside folder {name}", "open {name} folder"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "open folder {name}",
+        "go to folder {name}",
+        "go inside folder {name}",
+        "open {name} folder"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Opening folder {name}."
     },
     {
       "intent": "GO_BACK",
-      "patterns": ["go back", "back", "navigate back", "up one level", "parent directory"],
+      "patterns": [
+        "go back",
+        "back",
+        "navigate back",
+        "up one level",
+        "parent directory"
+      ],
       "params": {},
       "feedback": "Going back."
     },
     {
       "intent": "CREATE_FOLDER",
-      "patterns": ["create folder {name}", "make folder {name}", "new folder {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "create folder {name}",
+        "make folder {name}",
+        "new folder {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Folder {name} created."
     },
     {
       "intent": "CREATE_TXT_FILE",
-      "patterns": ["create text file {name}", "create txt file {name}", "new text file {name}", "make text file {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "create text file {name}",
+        "create txt file {name}",
+        "new text file {name}",
+        "make text file {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Text file created."
     },
     {
       "intent": "CREATE_WORD_FILE",
-      "patterns": ["create word file {name}", "create word document {name}", "create docx file {name}", "new word file {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "create word file {name}",
+        "create word document {name}",
+        "create docx file {name}",
+        "new word file {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "Word document created."
     },
     {
       "intent": "CREATE_FILE",
-      "patterns": ["create file {name}", "new file {name}", "make file {name}"],
-      "params": {"name": ".+"},
+      "patterns": [
+        "create file {name}",
+        "new file {name}",
+        "make file {name}"
+      ],
+      "params": {
+        "name": ".+"
+      },
       "feedback": "File {name} created."
     },
     {
       "intent": "RENAME_ITEM",
-      "patterns": ["rename {old_name} to {new_name}", "rename file {old_name} to {new_name}", "rename folder {old_name} to {new_name}"],
-      "params": {"old_name": ".+?", "new_name": ".+"},
+      "patterns": [
+        "rename {old_name} to {new_name}",
+        "rename file {old_name} to {new_name}",
+        "rename folder {old_name} to {new_name}"
+      ],
+      "params": {
+        "old_name": ".+?",
+        "new_name": ".+"
+      },
       "feedback": "Renamed to {new_name}."
     },
     {
       "intent": "OPEN_APP",
-      "patterns": ["open {app}", "launch {app}", "start {app}"],
-      "params": {"app": "(chrome|edge|comet|notepad|calculator|word|powerpoint|excel|task manager|settings|snipping tool)"},
+      "patterns": [
+        "open {app}",
+        "launch {app}",
+        "start {app}"
+      ],
+      "params": {
+        "app": "(chrome|edge|comet|notepad|calculator|word|powerpoint|excel|task manager|settings|snipping tool)"
+      },
       "feedback": "Opening {app}."
     },
     {
       "intent": "COPY_URL",
-      "patterns": ["copy url", "copy chrome url", "copy browser url", "copy link", "copy address"],
+      "patterns": [
+        "copy url",
+        "copy chrome url",
+        "copy browser url",
+        "copy link",
+        "copy address"
+      ],
       "params": {},
       "feedback": "URL copied to clipboard."
     },
     {
       "intent": "WEB_SEARCH",
-      "patterns": ["search {query}", "search google for {query}", "search for {query}", "google {query}"],
-      "params": {"query": ".+"},
+      "patterns": [
+        "search {query}",
+        "search google for {query}",
+        "search for {query}",
+        "google {query}"
+      ],
+      "params": {
+        "query": ".+"
+      },
       "feedback": "Searching for {query}."
     },
     {
       "intent": "NEW_TAB",
-      "patterns": ["new tab", "open new tab", "create new tab"],
+      "patterns": [
+        "new tab",
+        "open new tab",
+        "create new tab"
+      ],
       "params": {},
       "feedback": "New tab opened."
     },
     {
       "intent": "CLOSE_TAB",
-      "patterns": ["close tab"],
+      "patterns": [
+        "close tab"
+      ],
       "params": {},
       "feedback": "Tab closed."
     },
     {
       "intent": "REOPEN_TAB",
-      "patterns": ["reopen tab", "reopen closed tab", "restore tab"],
+      "patterns": [
+        "reopen tab",
+        "reopen closed tab",
+        "restore tab"
+      ],
       "params": {},
       "feedback": "Restoring tab."
     },
     {
       "intent": "BOOKMARK_PAGE",
-      "patterns": ["bookmark page", "bookmark this", "bookmark"],
+      "patterns": [
+        "bookmark page",
+        "bookmark this",
+        "bookmark"
+      ],
       "params": {},
       "feedback": "Bookmarked."
     },
     {
       "intent": "NEXT_PAGE",
-      "patterns": ["next page", "go to next page", "page down", "scroll down"],
+      "patterns": [
+        "next page",
+        "go to next page",
+        "page down",
+        "scroll down"
+      ],
       "params": {},
       "feedback": "Next page."
     },
     {
       "intent": "PREV_PAGE",
-      "patterns": ["previous page", "go to previous page", "page up", "scroll up"],
+      "patterns": [
+        "previous page",
+        "go to previous page",
+        "page up",
+        "scroll up"
+      ],
       "params": {},
       "feedback": "Previous page."
     },
     {
       "intent": "TAKE_SCREENSHOT",
-      "patterns": ["take screenshot", "capture screen", "screenshot", "print screen"],
+      "patterns": [
+        "take screenshot",
+        "capture screen",
+        "screenshot",
+        "print screen"
+      ],
       "params": {},
       "feedback": "Screenshot captured."
     },
     {
       "intent": "SNIPPING_TOOL",
-      "patterns": ["activate snipping tool", "open snipping tool", "snipping tool"],
+      "patterns": [
+        "activate snipping tool",
+        "open snipping tool",
+        "snipping tool"
+      ],
       "params": {},
       "feedback": "Snipping Tool activated."
     },
     {
       "intent": "SHOW_DESKTOP",
-      "patterns": ["show desktop", "go to desktop", "minimize all", "clear screen"],
+      "patterns": [
+        "show desktop",
+        "go to desktop",
+        "minimize all",
+        "clear screen"
+      ],
       "params": {},
       "feedback": "Showing desktop."
     },
     {
       "intent": "OPEN_CLIPBOARD",
-      "patterns": ["open clipboard", "show clipboard", "clipboard history", "clipboard"],
+      "patterns": [
+        "open clipboard",
+        "show clipboard",
+        "clipboard history",
+        "clipboard"
+      ],
       "params": {},
       "feedback": "Clipboard history opened."
     },
     {
       "intent": "LOCK_PC",
-      "patterns": ["lock pc", "lock computer", "lock screen", "lock workstation"],
+      "patterns": [
+        "lock pc",
+        "lock computer",
+        "lock screen",
+        "lock workstation"
+      ],
       "params": {},
       "feedback": "Locking workstation."
     },
     {
       "intent": "MAXIMIZE_WINDOW",
-      "patterns": ["maximize window", "maximize", "full screen"],
+      "patterns": [
+        "maximize window",
+        "maximize",
+        "full screen"
+      ],
       "params": {},
       "feedback": "Window maximized."
     },
     {
       "intent": "SNAP_LEFT",
-      "patterns": ["snap left", "snap window left", "window left"],
+      "patterns": [
+        "snap left",
+        "snap window left",
+        "window left"
+      ],
       "params": {},
       "feedback": "Snapped left."
     },
     {
       "intent": "SNAP_RIGHT",
-      "patterns": ["snap right", "snap window right", "window right"],
+      "patterns": [
+        "snap right",
+        "snap window right",
+        "window right"
+      ],
       "params": {},
       "feedback": "Snapped right."
     },
     {
       "intent": "VOLUME_UP",
-      "patterns": ["volume up", "increase volume", "louder"],
+      "patterns": [
+        "volume up",
+        "increase volume",
+        "louder"
+      ],
       "params": {},
       "feedback": "Volume increased."
     },
     {
       "intent": "VOLUME_DOWN",
-      "patterns": ["volume down", "decrease volume", "lower volume"],
+      "patterns": [
+        "volume down",
+        "decrease volume",
+        "lower volume"
+      ],
       "params": {},
       "feedback": "Volume decreased."
     },
     {
       "intent": "MUTE_VOLUME",
-      "patterns": ["mute", "unmute", "toggle mute"],
+      "patterns": [
+        "mute",
+        "unmute",
+        "toggle mute"
+      ],
       "params": {},
       "feedback": "Audio muted."
     },
     {
       "intent": "WHAT_TIME",
-      "patterns": ["what time is it", "current time", "tell me the time", "what is the time", "time"],
+      "patterns": [
+        "what time is it",
+        "current time",
+        "tell me the time",
+        "what is the time",
+        "time"
+      ],
       "params": {},
       "feedback": "{time}"
     },
     {
       "intent": "BATTERY_STATUS",
-      "patterns": ["check battery", "battery status", "battery level", "how much battery"],
+      "patterns": [
+        "check battery",
+        "battery status",
+        "battery level",
+        "how much battery"
+      ],
       "params": {},
       "feedback": "Battery is at {percent} percent."
+    },
+    {
+      "intent": "CONFIRM_YES",
+      "patterns": [
+        "yes",
+        "yeah",
+        "yep",
+        "correct",
+        "confirm",
+        "proceed",
+        "sure"
+      ],
+      "params": {},
+      "feedback": "Confirmed."
+    },
+    {
+      "intent": "CONFIRM_NO",
+      "patterns": [
+        "no",
+        "nope",
+        "cancel",
+        "stop",
+        "abort"
+      ],
+      "params": {},
+      "feedback": "Cancelled."
+    },
+    {
+      "intent": "SET_GROQ_KEY",
+      "patterns": [
+        "set groq key {key}",
+        "set groq api key {key}"
+      ],
+      "params": {
+        "key": ".+"
+      },
+      "feedback": "Groq API key updated."
     }
   ]
 }

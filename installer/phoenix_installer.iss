@@ -6,7 +6,7 @@
 #define MyAppVersion "1.1.0"
 #define MyAppPublisher "Antigravity AI"
 #define MyAppURL "https://github.com/swayamprabhu2005/P.H.O.E.N.I.X."
-#define MyAppExeName "run.bat"
+#define MyAppRunner "silent_run.vbs"
 #define MyAppIcoName "phoenix.ico"
 
 [Setup]
@@ -48,9 +48,9 @@ Source: "..\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createall
 Source: "phoenix.ico"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; IconFilename: "{app}\{#MyAppIcoName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: desktopicon; IconFilename: "{app}\{#MyAppIcoName}"
-Name: "{autostartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; WorkingDir: "{app}"; Tasks: startupicon; IconFilename: "{app}\{#MyAppIcoName}"
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\{#MyAppRunner}"""; WorkingDir: "{app}"; IconFilename: "{app}\{#MyAppIcoName}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\{#MyAppRunner}"""; WorkingDir: "{app}"; Tasks: desktopicon; IconFilename: "{app}\{#MyAppIcoName}"
+Name: "{autostartup}\{#MyAppName}"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\{#MyAppRunner}"""; WorkingDir: "{app}"; Tasks: startupicon; IconFilename: "{app}\{#MyAppIcoName}"
 
 [Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall nowait skipifsilent
+Filename: "{sys}\wscript.exe"; Parameters: """{app}\{#MyAppRunner}"""; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: shellexec postinstall nowait skipifsilent
