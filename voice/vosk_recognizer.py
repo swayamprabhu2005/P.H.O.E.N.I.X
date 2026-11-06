@@ -45,6 +45,7 @@ class VoskVoiceRecognizer:
 
         self.model = Model(self.model_path)
         self._init_recognizer(self.grammar_phrases)
+        self._init_audio_filter()
 
         self._audio_queue = queue.Queue()
         self._is_listening = False
@@ -62,6 +63,27 @@ class VoskVoiceRecognizer:
             self.recognizer = KaldiRecognizer(self.model, self.sample_rate, json.dumps(clean_list))
         else:
             self.recognizer = KaldiRecognizer(self.model, self.sample_rate)
+
+    def _init_audio_filter(self):
+        """Initializes 2nd-order Butterworth bandpass filter (80 Hz - 7500 Hz)."""
+        try:
+            from scipy.signal import butter, sosfilt_zi
+            self._filter_sos = butter(2, [80, 7500], btype="bandpass", fs=self.sample_rate, output="sos")
+            self._filter_zi = sosfilt_zi(self._filter_sos) * 0.0
+            self._has_filter = True
+        except Exception:
+            self._has_filter = False
+
+    def _filter_audio(self, samples: np.ndarray) -> np.ndarray:
+        """Removes low-frequency fan/desk vibrations (<80 Hz) and high-frequency noise (>7500 Hz)."""
+        if not getattr(self, "_has_filter", False):
+            return samples
+        try:
+            from scipy.signal import sosfilt
+            filtered, self._filter_zi = sosfilt(self._filter_sos, samples.astype(np.float32), zi=self._filter_zi)
+            return np.clip(filtered, -32768, 32767).astype(np.int16)
+        except Exception:
+            return samples
 
     def set_grammar(self, phrases: List[str]):
         """Updates the grammar dictionary dynamically."""
@@ -105,27 +127,31 @@ class VoskVoiceRecognizer:
 
         audio_bytes = bytes(indata)
 
-        # RMS Energy Noise Gate: Discard low-energy background room/breathing noise
+        # 1. Bandpass filter: Cut rumble (<80 Hz) and squeal (>7500 Hz)
         try:
-            samples = np.frombuffer(audio_bytes, dtype=np.int16)
-            rms = float(np.sqrt(np.mean(samples.astype(float)**2)))
+            raw_samples = np.frombuffer(audio_bytes, dtype=np.int16)
+            filtered_samples = self._filter_audio(raw_samples)
+            filtered_bytes = filtered_samples.tobytes()
+            rms = float(np.sqrt(np.mean(filtered_samples.astype(float)**2)))
         except Exception:
+            filtered_bytes = audio_bytes
             rms = self.dynamic_threshold + 10.0
 
-        # Slow adaptive tracking when room is quiet and no speech is in progress
+        # 2. Slow adaptive tracking when room is quiet and no speech is in progress
         if not self._has_detected_speech and rms < self.dynamic_threshold * 0.75:
             self.ambient_noise_level = 0.96 * self.ambient_noise_level + 0.04 * rms
             self.dynamic_threshold = max(100.0, self.ambient_noise_level + 90.0)
             self.energy_threshold = self.dynamic_threshold
 
+        # 3. Dynamic RMS Noise Gate
         if rms >= self.dynamic_threshold:
             self._has_detected_speech = True
             self._last_speech_time = time.time()
-            self._audio_queue.put(audio_bytes)
+            self._audio_queue.put(filtered_bytes)
         elif self._has_detected_speech:
             # Trailing audio after speech to allow sentence closure
             if time.time() - self._last_speech_time <= self.silence_timeout:
-                self._audio_queue.put(audio_bytes)
+                self._audio_queue.put(filtered_bytes)
 
     def start_listening(self):
         """Activates microphone and starts processing audio stream."""

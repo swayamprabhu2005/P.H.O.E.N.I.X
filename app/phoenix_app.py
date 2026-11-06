@@ -278,11 +278,13 @@ class PhoenixApp:
                 action = self._pending_confirmation
                 self._pending_confirmation = None
                 self.window_mgr.hide_confirmation()
+                self.recognizer.set_grammar(self._build_grammar_phrases())
                 self._execute_confirmed_action(action["target"], action["action_type"], action["action_data"])
                 return
             elif intent == "CONFIRM_NO":
                 self._pending_confirmation = None
                 self.window_mgr.hide_confirmation()
+                self.recognizer.set_grammar(self._build_grammar_phrases())
                 self.tts.speak("Cancelled. You may type manually or speak another command.")
                 self.state_mgr.transition_to(AppState.LISTENING)
                 return
@@ -390,6 +392,8 @@ class PhoenixApp:
             "action_data": action_data
         }
 
+        # State-dependent grammar: restrict vocabulary strictly to confirmation tokens
+        self.recognizer.set_grammar(["yes", "no", "cancel", "confirm", "proceed", "okay", "stop"])
         self.window_mgr.show_confirmation(prompt, target_name, "search", action_data)
         spoken_prompt = f"Did you mean to open {target_name}?" if target_url else f"Did you mean to search {target_name}?"
         self.tts.speak(spoken_prompt)
@@ -405,6 +409,8 @@ class PhoenixApp:
             "action_data": params
         }
 
+        # State-dependent grammar: restrict vocabulary strictly to confirmation tokens
+        self.recognizer.set_grammar(["yes", "no", "cancel", "confirm", "proceed", "okay", "stop"])
         self.window_mgr.show_confirmation(prompt, name, intent, params)
         self.tts.speak(f"Is {name} the {item_type} name you intend to use?")
 
@@ -412,6 +418,8 @@ class PhoenixApp:
         """Called directly when user clicks Yes / Cancel or submits manual text in dialog."""
         self._pending_confirmation = None
         self.window_mgr.hide_confirmation()
+        # Restore full command vocabulary grammar
+        self.recognizer.set_grammar(self._build_grammar_phrases())
 
         if not confirmed:
             self.tts.speak("Cancelled.")
