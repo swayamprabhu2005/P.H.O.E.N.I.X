@@ -6,9 +6,9 @@ WshShell.CurrentDirectory = currentDir
 
 setupDoneMarker = currentDir & "\config\.setup_done"
 
-' If first time running, open console wizard to ask for Name & Groq Key
+' If first time running, open interactive console wizard for setup
 If Not fso.FileExists(setupDoneMarker) Then
-    WshShell.Run "python app\first_run_setup.py", 1, True
+    WshShell.Run "cmd.exe /c python app\first_run_setup.py", 1, True
 End If
 
 ' Launch P.H.O.E.N.I.X. silently in the background with windowless pythonw

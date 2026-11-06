@@ -63,8 +63,9 @@ class PhoenixApp:
             on_change_name=self.set_user_name,
             on_confirm_action=self.on_gui_confirm_action,
             on_save_groq_key=self.set_groq_key,
-            width=win_cfg.get("width", 360),
-            height=win_cfg.get("height", 360)
+            on_onboarding_complete=self.on_onboarding_complete,
+            width=win_cfg.get("width", 380),
+            height=win_cfg.get("height", 420)
         )
 
         self.tray_mgr = SystemTrayManager(
@@ -148,15 +149,50 @@ class PhoenixApp:
         # Run webview GUI loop (blocking main thread)
         webview.start(self._on_webview_ready, gui="edgechromium")
 
+    def on_onboarding_complete(self, name: str, groq_key: str):
+        chosen_name = name.strip().title() if name.strip() else "Operator"
+        chosen_key = groq_key.strip()
+
+        if "user" not in self.config:
+            self.config["user"] = {}
+        self.config["user"]["name"] = chosen_name
+
+        if "ai" not in self.config:
+            self.config["ai"] = {}
+        self.config["ai"]["groq_api_key"] = chosen_key
+        if chosen_key:
+            self.groq_client.set_api_key(chosen_key)
+
+        config_path = os.path.join(self.base_dir, "config", "settings.json")
+        try:
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(self.config, f, indent=2)
+        except Exception as e:
+            print(f"Error saving config: {e}")
+
+        # Write setup done marker
+        marker_path = os.path.join(self.base_dir, "config", ".setup_done")
+        try:
+            with open(marker_path, "w", encoding="utf-8") as f:
+                f.write(f"Setup completed at {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
+        except Exception:
+            pass
+
+        self.tts.speak(f"Personalization complete. At your service, {chosen_name}.")
+
     def _on_webview_ready(self):
         """Called once the pywebview window is loaded."""
         time.sleep(0.4)
         curr_dir = self.navigator.get_current_directory()
         self.window_mgr.update_ui_state("standby", "", curr_dir)
 
-        # Greet user personalized on launch: "At your service, Swayam."
+        setup_marker = os.path.join(self.base_dir, "config", ".setup_done")
         user_name = self.get_user_name()
-        self.tts.speak(f"At your service, {user_name}.")
+        if not os.path.exists(setup_marker) or not self.config.get("user", {}).get("name"):
+            self.window_mgr.show_onboarding()
+            self.tts.speak("Welcome to Phoenix. Please configure your operator credentials.")
+        else:
+            self.tts.speak(f"At your service, {user_name}.")
 
     def wake_up(self):
         """Awakens assistant upon clicking the 3D core and starts voice capture."""

@@ -27,6 +27,23 @@
                 <button id="btn-dialog-no" class="holo-btn btn-no">&#10006; Cancel</button>
             </div>
         </div>
+
+        <!-- First-Run Holographic Personalization Card -->
+        <div id="onboarding-card" class="holo-dialog holo-onboarding hidden">
+            <div class="onboarding-badge">INITIALIZATION</div>
+            <div class="dialog-prompt">Personalize your desktop AI assistant:</div>
+            <div class="dialog-input-wrap">
+                <label class="input-label" for="onboard-name-input">Operator Name</label>
+                <input id="onboard-name-input" type="text" placeholder="What should PHOENIX call you?" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="dialog-input-wrap">
+                <label class="input-label" for="onboard-groq-input">Groq Cloud AI Key (Optional)</label>
+                <input id="onboard-groq-input" type="password" placeholder="gsk_... (press Enter to skip)" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="dialog-actions">
+                <button id="btn-onboard-submit" class="holo-btn btn-yes">&#10004; Activate P.H.O.E.N.I.X.</button>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->

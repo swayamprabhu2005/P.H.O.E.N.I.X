@@ -18,6 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnYes = document.getElementById('btn-dialog-yes');
     const btnNo = document.getElementById('btn-dialog-no');
 
+    const onboardCard = document.getElementById('onboarding-card');
+    const onboardNameInput = document.getElementById('onboard-name-input');
+    const onboardGroqInput = document.getElementById('onboard-groq-input');
+    const btnOnboardSubmit = document.getElementById('btn-onboard-submit');
+
     let currentActionType = '';
     let currentActionData = {};
     let currentState = 'standby';
@@ -83,6 +88,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 4. Onboarding Dialog Handlers
+    function submitOnboarding() {
+        const nameVal = onboardNameInput.value.trim();
+        const groqVal = onboardGroqInput.value.trim();
+
+        if (window.pywebview && window.pywebview.api && window.pywebview.api.complete_onboarding) {
+            window.pywebview.api.complete_onboarding(nameVal, groqVal);
+        }
+        window.hideOnboarding();
+    }
+
+    if (btnOnboardSubmit) {
+        btnOnboardSubmit.addEventListener('click', (e) => {
+            e.stopPropagation();
+            submitOnboarding();
+        });
+    }
+
+    if (onboardNameInput) {
+        onboardNameInput.addEventListener('keydown', (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') {
+                if (onboardGroqInput) onboardGroqInput.focus();
+                else submitOnboarding();
+            }
+        });
+    }
+
+    if (onboardGroqInput) {
+        onboardGroqInput.addEventListener('keydown', (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') {
+                submitOnboarding();
+            }
+        });
+    }
+
     // 4. Global API exposed for Python to call
     window.updateState = function(state, message, activePath) {
         currentState = state;
@@ -128,6 +170,26 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmCard.style.pointerEvents = 'none';
         currentActionType = '';
         currentActionData = {};
+    };
+
+    window.showOnboarding = function() {
+        if (!onboardCard) return;
+        onboardCard.classList.remove('hidden');
+        onboardCard.style.display = 'flex';
+        onboardCard.style.opacity = '1';
+        onboardCard.style.pointerEvents = 'auto';
+
+        setTimeout(() => {
+            if (onboardNameInput) onboardNameInput.focus();
+        }, 150);
+    };
+
+    window.hideOnboarding = function() {
+        if (!onboardCard) return;
+        onboardCard.classList.add('hidden');
+        onboardCard.style.display = 'none';
+        onboardCard.style.opacity = '0';
+        onboardCard.style.pointerEvents = 'none';
     };
 
     window.setAudioLevel = function(level) {

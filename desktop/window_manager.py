@@ -1,8 +1,5 @@
-import ctypes
 import json
 import os
-import threading
-import time
 from typing import Callable, Optional, Dict, Any
 import webview
 
@@ -16,7 +13,8 @@ class WindowApi:
         on_hide: Callable[[], None],
         on_change_name: Optional[Callable[[str], None]] = None,
         on_confirm_action: Optional[Callable[[bool, str, str, Dict[str, Any]], None]] = None,
-        on_save_groq_key: Optional[Callable[[str], None]] = None
+        on_save_groq_key: Optional[Callable[[str], None]] = None,
+        on_onboarding_complete: Optional[Callable[[str, str], None]] = None
     ):
         self.on_wake = on_wake
         self.on_sleep = on_sleep
@@ -24,6 +22,7 @@ class WindowApi:
         self.on_change_name = on_change_name
         self.on_confirm_action = on_confirm_action
         self.on_save_groq_key = on_save_groq_key
+        self.on_onboarding_complete = on_onboarding_complete
 
     def wake_up(self):
         if self.on_wake:
@@ -53,6 +52,10 @@ class WindowApi:
         if self.on_save_groq_key:
             self.on_save_groq_key(key)
 
+    def complete_onboarding(self, name: str, groq_key: str):
+        if self.on_onboarding_complete:
+            self.on_onboarding_complete(name, groq_key)
+
 class DesktopWindowManager:
     """Manages the pywebview transparent floating desktop HUD."""
 
@@ -64,8 +67,9 @@ class DesktopWindowManager:
         on_change_name: Optional[Callable[[str], None]] = None,
         on_confirm_action: Optional[Callable[[bool, str, str, Dict[str, Any]], None]] = None,
         on_save_groq_key: Optional[Callable[[str], None]] = None,
-        width: int = 360,
-        height: int = 360
+        on_onboarding_complete: Optional[Callable[[str, str], None]] = None,
+        width: int = 380,
+        height: int = 420
     ):
         self.on_wake = on_wake
         self.on_sleep = on_sleep
@@ -73,6 +77,7 @@ class DesktopWindowManager:
         self.on_change_name = on_change_name
         self.on_confirm_action = on_confirm_action
         self.on_save_groq_key = on_save_groq_key
+        self.on_onboarding_complete = on_onboarding_complete
         self.width = width
         self.height = height
 
@@ -82,7 +87,8 @@ class DesktopWindowManager:
             self._handle_hide,
             self._handle_change_name,
             self._handle_confirm_action,
-            self._handle_save_groq_key
+            self._handle_save_groq_key,
+            self._handle_onboarding_complete
         )
         self.window = None
 
@@ -113,36 +119,9 @@ class DesktopWindowManager:
         if self.on_save_groq_key:
             self.on_save_groq_key(key)
 
-    def _apply_windows_transparency(self):
-        """Applies Windows DWM glass margins and layered colorkey for 100% desktop transparency."""
-        try:
-            import win32gui
-            import win32con
-            import win32api
-
-            class MARGINS(ctypes.Structure):
-                _fields_ = [("cxLeftWidth", ctypes.c_int),
-                            ("cxRightWidth", ctypes.c_int),
-                            ("cyTopHeight", ctypes.c_int),
-                            ("cyBottomHeight", ctypes.c_int)]
-
-            for _ in range(40):
-                time.sleep(0.1)
-                hwnd = win32gui.FindWindow(None, "P.H.O.E.N.I.X.")
-                if hwnd:
-                    # Apply full DWM sheet-of-glass margins
-                    margins = MARGINS(-1, -1, -1, -1)
-                    ctypes.windll.dwmapi.DwmExtendFrameIntoClientArea(hwnd, ctypes.byref(margins))
-
-                    # Set WS_EX_LAYERED
-                    ex_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
-                    win32gui.SetWindowLong(hwnd, win32con.GWL_EXSTYLE, ex_style | win32con.WS_EX_LAYERED)
-
-                    # Key out WinForms default SystemColors.Control (240, 240, 240)
-                    win32gui.SetLayeredWindowAttributes(hwnd, win32api.RGB(240, 240, 240), 0, win32con.LWA_COLORKEY)
-                    break
-        except Exception as e:
-            print(f"[HUD] Note: Win32 transparency hook: {e}")
+    def _handle_onboarding_complete(self, name: str, groq_key: str):
+        if self.on_onboarding_complete:
+            self.on_onboarding_complete(name, groq_key)
 
     def create_window(self):
         """Creates the transparent frameless pywebview window."""
@@ -158,10 +137,6 @@ class DesktopWindowManager:
             transparent=True,
             background_color="#000000"
         )
-
-        # Launch background thread to apply native Windows transparency attributes
-        threading.Thread(target=self._apply_windows_transparency, daemon=True).start()
-
         return self.window
 
     def update_ui_state(self, state: str, message: str = "", active_path: str = ""):
@@ -172,7 +147,7 @@ class DesktopWindowManager:
             js = f"if (window.updateState) window.updateState('{state}', '{safe_msg}', '{safe_path}');"
             try:
                 self.window.evaluate_js(js)
-            except Exception as e:
+            except Exception:
                 pass
 
     def show_feedback(self, cmd_text: str, result_text: str, is_success: bool = True):
@@ -184,7 +159,7 @@ class DesktopWindowManager:
             js = f"if (window.showFeedback) window.showFeedback('{safe_cmd}', '{safe_res}', {bool_str});"
             try:
                 self.window.evaluate_js(js)
-            except Exception as e:
+            except Exception:
                 pass
 
     def show_confirmation(self, prompt: str, target: str, action_type: str, action_data: Dict[str, Any]):
@@ -196,7 +171,7 @@ class DesktopWindowManager:
             js = f"if (window.showConfirmationDialog) window.showConfirmationDialog('{safe_prompt}', '{safe_target}', '{action_type}', JSON.parse('{safe_data}'));"
             try:
                 self.window.evaluate_js(js)
-            except Exception as e:
+            except Exception:
                 pass
 
     def hide_confirmation(self):
@@ -205,7 +180,24 @@ class DesktopWindowManager:
             js = "if (window.hideConfirmationDialog) window.hideConfirmationDialog();"
             try:
                 self.window.evaluate_js(js)
-            except Exception as e:
+            except Exception:
+                pass
+
+    def show_onboarding(self):
+        """Shows first-time onboarding card on the HUD."""
+        if self.window:
+            js = "if (window.showOnboarding) window.showOnboarding();"
+            try:
+                self.window.evaluate_js(js)
+            except Exception:
+                pass
+
+    def hide_onboarding(self):
+        if self.window:
+            js = "if (window.hideOnboarding) window.hideOnboarding();"
+            try:
+                self.window.evaluate_js(js)
+            except Exception:
                 pass
 
     def show(self):

@@ -22,3 +22,19 @@ def test_tray_manager_icon_image():
     assert isinstance(icon_image, Image.Image)
     assert icon_image.size == (64, 64)
     assert icon_image.mode == "RGBA"
+
+def test_desktop_window_manager_onboarding():
+    called = []
+    def on_onboarding(name, key):
+        called.append((name, key))
+
+    wm = DesktopWindowManager(on_onboarding_complete=on_onboarding)
+    wm.api.complete_onboarding("Swayam", "gsk_test123")
+    assert called == [("Swayam", "gsk_test123")]
+
+    wm.window = MagicMock()
+    wm.show_onboarding()
+    wm.window.evaluate_js.assert_called_with("if (window.showOnboarding) window.showOnboarding();")
+
+    wm.hide_onboarding()
+    wm.window.evaluate_js.assert_called_with("if (window.hideOnboarding) window.hideOnboarding();")
