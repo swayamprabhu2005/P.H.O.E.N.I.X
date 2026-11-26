@@ -8,7 +8,8 @@
     "version": "1.1.0",
     "tts_enabled": true,
     "tts_rate": 185,
-    "tts_volume": 1.0
+    "tts_volume": 1.0,
+    "voice_only_confirmation": true
   },
   "window": {
     "width": 360,

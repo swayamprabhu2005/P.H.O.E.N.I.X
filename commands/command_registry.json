@@ -461,7 +461,9 @@
       "intent": "LOCK_PC",
       "patterns": [
         "lock pc",
+        "lock the pc",
         "lock computer",
+        "lock the computer",
         "lock screen",
         "lock workstation"
       ],
@@ -587,6 +589,82 @@
         "key": ".+"
       },
       "feedback": "Groq API key updated."
+    },
+    {
+      "intent": "UIA_CLICK",
+      "patterns": [
+        "click {element}",
+        "click on {element}",
+        "press {element}"
+      ],
+      "params": {
+        "element": ".+"
+      },
+      "feedback": "Clicked {element}."
+    },
+    {
+      "intent": "UIA_TYPE",
+      "patterns": [
+        "type {text}",
+        "write {text}"
+      ],
+      "params": {
+        "text": ".+"
+      },
+      "feedback": "Typed."
+    },
+    {
+      "intent": "UIA_SCROLL_DOWN",
+      "patterns": [
+        "scroll window down",
+        "smooth scroll down",
+        "wheel down"
+      ],
+      "params": {},
+      "feedback": "Scrolling down."
+    },
+    {
+      "intent": "UIA_SCROLL_UP",
+      "patterns": [
+        "scroll window up",
+        "smooth scroll up",
+        "wheel up"
+      ],
+      "params": {},
+      "feedback": "Scrolling up."
+    },
+    {
+      "intent": "FOCUS_WINDOW",
+      "patterns": [
+        "focus {window}",
+        "switch to window {window}",
+        "bring up {window}"
+      ],
+      "params": {
+        "window": ".+"
+      },
+      "feedback": "Switching to {window}."
+    },
+    {
+      "intent": "OPEN_SETTINGS",
+      "patterns": [
+        "help",
+        "open settings",
+        "phoenix settings",
+        "change voice model"
+      ],
+      "params": {},
+      "feedback": "Opening settings."
+    },
+    {
+      "intent": "OPEN_GUIDE",
+      "patterns": [
+        "guide",
+        "open guide",
+        "show guide"
+      ],
+      "params": {},
+      "feedback": "Opening guide."
     }
   ]
 }

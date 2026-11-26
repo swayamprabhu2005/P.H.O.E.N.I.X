@@ -11,6 +11,7 @@ from execution.app_launcher import AppLauncher
 from execution.file_ops import FileOperations
 from execution.browser_ops import BrowserOperations
 from execution.screen_ops import ScreenOperations
+from execution.uia_ops import UIAutomator
 from execution.win_shortcuts import WindowsShortcuts
 
 class CommandExecutor:
@@ -19,6 +20,7 @@ class CommandExecutor:
     def __init__(self, navigator: Optional[SystemNavigator] = None):
         self.navigator = navigator or SystemNavigator()
         self.app_launcher = AppLauncher()
+        self.uia = UIAutomator()
         self.comet_path = r"C:\Program Files\Perplexity\Comet\Application\comet.exe"
         self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         self.settings_path = os.path.join(self.base_dir, "config", "settings.json")
@@ -317,7 +319,31 @@ class CommandExecutor:
                 return True, f"Battery: {percent}% ({plugged})", f"Battery is at {percent} percent, {plugged}."
             return True, "Desktop system without battery", "No battery detected."
 
-        # 12. Custom Dynamic Actions added via tools/add_feature.py
+        # 12. Windows UI Automation (UIA3) Smart Desktop Actions
+        elif intent == "UIA_CLICK":
+            element = params.get("element", "").strip()
+            ok, msg = self.uia.click_element(element)
+            return ok, msg, msg
+
+        elif intent == "UIA_TYPE":
+            text = params.get("text", "").strip()
+            ok, msg = self.uia.type_text(text)
+            return ok, msg, ("Typed." if ok else msg)
+
+        elif intent == "UIA_SCROLL_DOWN":
+            ok, msg = self.uia.scroll_active("down")
+            return ok, msg, msg
+
+        elif intent == "UIA_SCROLL_UP":
+            ok, msg = self.uia.scroll_active("up")
+            return ok, msg, msg
+
+        elif intent == "FOCUS_WINDOW":
+            window_name = params.get("window", "").strip()
+            ok, msg = self.uia.focus_window(window_name)
+            return ok, msg, msg
+
+        # 13. Custom Dynamic Actions added via tools/add_feature.py
         elif intent == "SET_GROQ_KEY":
             key = params.get("key", "").strip()
             if key and os.path.exists(self.settings_path):

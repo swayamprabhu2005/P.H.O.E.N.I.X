@@ -110,7 +110,7 @@ class CommandParser:
                     drives = ["c", "d", "e"]
                     for drive in drives:
                         phrases.add(pat_lower.replace("{drive}", drive))
-                elif "{name}" in pat_lower or "{query}" in pat_lower or "{key}" in pat_lower:
+                elif "{name}" in pat_lower or "{query}" in pat_lower or "{key}" in pat_lower or "{" in pat_lower:
                     # Add base action words
                     base_prefix = re.sub(r"\{.*?\}", "", pat_lower).strip()
                     if base_prefix:
@@ -126,7 +126,9 @@ class CommandParser:
             "yes", "yeah", "yep", "correct", "confirm", "proceed", "sure",
             "no", "nope", "cancel", "stop", "abort",
             "standby", "sleep", "wake up", "close phoenix", "shutdown",
-            "search", "google", "find"
+            "search", "google", "find",
+            "click", "press", "type", "write", "scroll down", "scroll up",
+            "save", "submit", "ok", "close", "play", "pause", "next", "send"
         ]
         phrases.update(essential)
 
