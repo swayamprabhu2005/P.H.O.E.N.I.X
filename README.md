@@ -32,17 +32,19 @@ Designed specifically for **low-resource Windows computers (4 GB RAM, CPU-only, 
    - Smooth **top-to-bottom Ultron Blue wave transition** when entering sleep mode.
    - 100% transparent borderless overlay that can be dragged anywhere across the desktop.
 
-2. **100% Offline Speech Recognition (Vosk):**
-   - Uses `vosk-model-small-en-us-0.15` stored **directly inside the project folder (`models/`)**.
-   - Zero internet connectivity required. Zero telemetry or audio streaming.
+2. **Pluggable Voice Engine & Multi-Stage Noise Reduction:**
+   - **Vosk (`vosk-model-small-en-us-0.15`)** bundled as the offline default inside `models/`, with one-click switching to **Faster-Whisper (`tiny.en`)**, **Windows Native Speech (0 MB download)**, or **Groq Cloud Whisper** via the `"Help"` Settings card (automatically replacing old cached models).
+   - Multi-stage CPU-only denoising pipeline: half-duplex **TTS echo gate** (prevents self-listening), **100–7000 Hz bandpass**, **FFT stationary spectral noise subtraction**, and **vocal-band VAD**.
    - Microphone hardware is active **only** when awakened, and immediately halts when entering standby.
 
 3. **Strict Silent Ambient Speech Filtering:**
    - Filters recognized speech strictly against registered commands.
    - Ambient conversation and background room noise are silently ignored without disruptive failure audios or popups.
 
-4. **Personalized Assistant Persona (SAPI5):**
+4. **Personalized Assistant Persona, Voice-Only Confirmation & Settings (`"Help"` / `"Guide"`):**
    - Greets user personalized on startup and on wake: *"At your service, Swayam."*
+   - Voice-only disambiguation prompts keep the 3D Dyson Sphere clean with zero text overlays over the rotating rings.
+   - Say **`"Help"`** anytime to re-open the light-theme Settings card (edit name, Groq API key, or voice model), or **`"Guide"`** to view core P.H.O.E.N.I.X. commands.
    - Change name anytime via voice (*"Call me [Name]"* or *"Change my name to [Name]"*).
 
 5. **Specialized Application Modes:**
@@ -65,10 +67,11 @@ Designed specifically for **low-resource Windows computers (4 GB RAM, CPU-only, 
    - *"Create folder [name]"*, *"Create text file [name]"*, *"Create word file [name]"*.
    - Stateful navigation: *"Go to D drive"*, *"Open folder [name]"*, *"Go back"*.
 
-8. **Instant Desktop Control:**
+8. **Instant Desktop Control & Windows UIA3 Smart Actions:**
+   - *"Click [element]"*, *"Type [text]"*, *"Scroll window down/up"*, *"Focus [window]"* &rarr; Native Windows UI Automation (UIA3) control without heavy vision models.
    - *"Take screenshot"* &rarr; Captures screen directly to **`Downloads/`** + copies to clipboard.
    - *"Activate Snipping Tool"* &rarr; Launches Windows Snipping Tool.
-   - *"Show desktop"* (`Win+D`), *"Open clipboard"* (`Win+V`), *"Lock PC"* (`Win+L`).
+   - *"Show desktop"* (`Win+D`), *"Open clipboard"* (`Win+V`), *"Lock the PC"* (`Win+L` + automatic standby).
    - *"Volume up"*, *"Volume down"*, *"Mute"*, *"What time is it"*, *"Check battery"*.
 
 ---
@@ -113,7 +116,7 @@ add_feature.bat
 | **Target OS** | Windows 10 / Windows 11 (64-bit) |
 | **Minimum Hardware** | 4 GB RAM, Dual-Core 2.0 GHz CPU, Integrated GPU |
 | **Active Memory Usage** | ~70 MB idle / ~120 MB peak active |
-| **Speech Recognizer** | Vosk HMM-DNN acoustic model (offline, local) |
+| **Speech Recognizer** | Pluggable: Vosk (Default, offline), Faster-Whisper, Windows Native, Groq Whisper |
 | **Voice Synthesis** | Microsoft SAPI5 Speech API (offline, native) |
 | **Visual Runtime** | Microsoft Edge WebView2 (DirectX hardware accelerated WebGL) |
 

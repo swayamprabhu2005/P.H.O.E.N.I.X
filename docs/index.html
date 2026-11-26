@@ -825,14 +825,14 @@
       <div class="bento-grid">
         <div class="bento-card">
           <div class="card-icon">⚡</div>
-          <h3>100% Offline Speech & Bandpass Filter</h3>
-          <p>Powered by local Vosk acoustic neural models with 2nd-order Butterworth DSP bandpass filtering (80 Hz–7500 Hz) to eliminate desk vibrations and fan rumble.</p>
+          <h3>Pluggable Voice &amp; Spectral Denoising</h3>
+          <p>Switch seamlessly between Vosk, Faster-Whisper, Windows Native, and Groq Whisper—backed by spectral noise subtraction, vocal-band VAD, and TTS echo gating.</p>
         </div>
 
         <div class="bento-card">
           <div class="card-icon">🎛️</div>
-          <h3>Adaptive Noise Calibration</h3>
-          <p>Dynamically measures your room's ambient noise floor in real-time, automatically adjusting speech gate sensitivity to silence whispers and room hiss.</p>
+          <h3>Windows UIA3 Smart Actions</h3>
+          <p>Native Windows UI Automation lets you click buttons, type into fields, scroll, and switch windows by voice with zero heavy vision models.</p>
         </div>
 
         <div class="bento-card">
@@ -957,7 +957,9 @@
         { phrase: '"take screenshot"', action: 'Saves to Downloads/ + clipboard' },
         { phrase: '"open clipboard"', action: 'Opens Windows clipboard history (Win+V)' },
         { phrase: '"volume up" / "mute"', action: 'System audio level control' },
-        { phrase: '"lock pc"', action: 'Secures Windows workstation (Win+L)' }
+        { phrase: '"lock the pc"', action: 'Locks Windows (Win+L) &amp; enters standby' },
+        { phrase: '"help" / "guide"', action: 'Opens Settings / Voice Model switcher or Guide' },
+        { phrase: '"click [element]" / "type [text]"', action: 'Native Windows UIA3 smart desktop actions' }
       ],
       apps: [
         { phrase: '"learning mode perplexity"', action: 'Opens Perplexity AI in Comet Browser' },

@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 import sys
 import threading
 import time
@@ -65,6 +66,7 @@ class PhoenixApp:
             on_confirm_action=self.on_gui_confirm_action,
             on_save_groq_key=self.set_groq_key,
             on_onboarding_complete=self.on_onboarding_complete,
+            on_open_add_feature=self.open_add_feature,
             on_close=self.shutdown,
             width=win_cfg.get("width", 380),
             height=win_cfg.get("height", 420)
@@ -210,6 +212,27 @@ class PhoenixApp:
             self.tts.speak(f"Settings saved. At your service, {chosen_name}.")
 
         threading.Thread(target=_sync_voice, daemon=True).start()
+
+    def open_add_feature(self):
+        """Launches the interactive custom command CLI wizard in a new console and reloads grammar on exit."""
+        bat_path = os.path.join(self.base_dir, "add_feature.bat")
+        script_path = os.path.join(self.base_dir, "tools", "add_feature.py")
+
+        def _run_wizard():
+            try:
+                creation_flags = getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
+                if os.path.exists(bat_path):
+                    proc = subprocess.Popen(["cmd.exe", "/c", bat_path], cwd=self.base_dir, creationflags=creation_flags)
+                else:
+                    proc = subprocess.Popen([sys.executable, script_path], cwd=self.base_dir, creationflags=creation_flags)
+                proc.wait()
+                # Reload command registry and voice grammar so new custom commands work immediately
+                self.parser._load_registry()
+                self.recognizer.set_grammar(self._build_grammar_phrases())
+            except Exception as e:
+                print(f"[ADD-FEATURE] Failed to launch CLI wizard: {e}")
+
+        threading.Thread(target=_run_wizard, daemon=True).start()
 
     def _on_webview_ready(self):
         """Called once the pywebview window is loaded. Starts silently in standby."""

@@ -16,7 +16,8 @@ class WindowApi:
         on_change_name: Optional[Callable[[str], None]] = None,
         on_confirm_action: Optional[Callable[[bool, str, str, Dict[str, Any]], None]] = None,
         on_save_groq_key: Optional[Callable[[str], None]] = None,
-        on_onboarding_complete: Optional[Callable[[str, str], None]] = None
+        on_onboarding_complete: Optional[Callable[..., None]] = None,
+        on_open_add_feature: Optional[Callable[[], None]] = None
     ):
         self.on_wake = on_wake
         self.on_sleep = on_sleep
@@ -25,6 +26,7 @@ class WindowApi:
         self.on_confirm_action = on_confirm_action
         self.on_save_groq_key = on_save_groq_key
         self.on_onboarding_complete = on_onboarding_complete
+        self.on_open_add_feature = on_open_add_feature
 
     def wake_up(self):
         if self.on_wake:
@@ -58,6 +60,10 @@ class WindowApi:
         if self.on_onboarding_complete:
             self.on_onboarding_complete(name, groq_key, voice_engine)
 
+    def open_add_feature(self):
+        if self.on_open_add_feature:
+            self.on_open_add_feature()
+
 class DesktopWindowManager:
     """Manages the pywebview transparent floating desktop HUD."""
 
@@ -69,7 +75,8 @@ class DesktopWindowManager:
         on_change_name: Optional[Callable[[str], None]] = None,
         on_confirm_action: Optional[Callable[[bool, str, str, Dict[str, Any]], None]] = None,
         on_save_groq_key: Optional[Callable[[str], None]] = None,
-        on_onboarding_complete: Optional[Callable[[str, str], None]] = None,
+        on_onboarding_complete: Optional[Callable[..., None]] = None,
+        on_open_add_feature: Optional[Callable[[], None]] = None,
         on_close: Optional[Callable[[], None]] = None,
         width: int = 380,
         height: int = 420
@@ -81,6 +88,7 @@ class DesktopWindowManager:
         self.on_confirm_action = on_confirm_action
         self.on_save_groq_key = on_save_groq_key
         self.on_onboarding_complete = on_onboarding_complete
+        self.on_open_add_feature = on_open_add_feature
         self.on_close = on_close
         self.width = width
         self.height = height
@@ -92,7 +100,8 @@ class DesktopWindowManager:
             self._handle_change_name,
             self._handle_confirm_action,
             self._handle_save_groq_key,
-            self._handle_onboarding_complete
+            self._handle_onboarding_complete,
+            self._handle_open_add_feature
         )
         self.window = None
 
@@ -126,6 +135,10 @@ class DesktopWindowManager:
     def _handle_onboarding_complete(self, name: str, groq_key: str, voice_engine: str = "vosk"):
         if self.on_onboarding_complete:
             self.on_onboarding_complete(name, groq_key, voice_engine)
+
+    def _handle_open_add_feature(self):
+        if self.on_open_add_feature:
+            self.on_open_add_feature()
 
     def _apply_taskbar_icon(self):
         """Applies high-res P.H.O.E.N.I.X. icon to Win32 window HWND so Taskbar shows official logo."""

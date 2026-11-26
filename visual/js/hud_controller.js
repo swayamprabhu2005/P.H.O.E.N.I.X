@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const onboardStatus = document.getElementById('onboard-status');
     const btnOnboardSubmit = document.getElementById('btn-onboard-submit');
     const btnOnboardClose = document.getElementById('btn-onboard-close');
+    const btnAddCommand = document.getElementById('btn-add-command');
 
     const guideCard = document.getElementById('guide-card');
     const btnGuideClose = document.getElementById('btn-guide-close');
@@ -125,6 +126,15 @@ document.addEventListener('DOMContentLoaded', () => {
         btnOnboardClose.addEventListener('click', (e) => {
             e.stopPropagation();
             window.hideOnboarding();
+        });
+    }
+
+    if (btnAddCommand) {
+        btnAddCommand.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.pywebview && window.pywebview.api && window.pywebview.api.open_add_feature) {
+                window.pywebview.api.open_add_feature();
+            }
         });
     }
 
