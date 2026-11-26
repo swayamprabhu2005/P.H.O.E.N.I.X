@@ -65,7 +65,6 @@ html, body {
     width: 100% !important;
     height: 100% !important;
     border-radius: 50%;
-    outline: none;
     background: transparent !important;
 }
 
@@ -109,7 +108,7 @@ html, body {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     -webkit-app-region: no-drag;
 }
 
@@ -150,7 +149,6 @@ html, body {
     background: rgba(0, 0, 0, 0.45);
     border: 1px solid var(--theme-border);
     border-radius: 8px;
-    outline: none;
     transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -173,8 +171,7 @@ html, body {
     border-radius: 8px;
     border: 1px solid var(--theme-border);
     cursor: pointer;
-    transition: all 0.25s ease;
-    outline: none;
+    transition: background-color 0.25s ease, box-shadow 0.25s ease;
 }
 
 .btn-yes {
@@ -197,41 +194,218 @@ html, body {
     color: #ffffff;
 }
 
-/* Holographic Onboarding Card */
-.holo-onboarding {
+/* Light Theme Square Settings & Guide Cards (Chroma-Craft: Snow White + Royal/Violet Purple + Magenta edge) */
+.light-square-card {
     top: 50%;
     bottom: auto;
+    left: 50%;
     transform: translate(-50%, -50%);
-    width: 330px;
-    padding: 16px;
-    gap: 12px;
+    width: 332px;
+    padding: 14px 16px;
+    gap: 9px;
+    background: #FBFBFD; /* Snow White */
+    color: #121214; /* Charcoal Onyx */
+    border: 1.5px solid #967BB6; /* Lavender Purple */
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(106, 13, 173, 0.22), 0 0 0 1px rgba(255, 0, 255, 0.14);
+    transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.holo-onboarding.hidden {
+.light-square-card.hidden {
     display: none;
     opacity: 0;
     pointer-events: none;
-    transform: translate(-50%, -40%) scale(0.95);
+    transform: translate(-50%, -44%) scale(0.96);
 }
 
-.onboarding-badge {
-    align-self: center;
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.light-badge {
     font-size: 10px;
     font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--theme-color);
-    text-shadow: 0 0 10px var(--theme-glow);
+    letter-spacing: 1.5px;
+    color: #6A0DAD; /* Violet Purple */
+    background: #F8F6F0; /* Pearl White */
+    border: 1px solid #967BB6; /* Lavender Purple */
+    border-radius: 999px;
     padding: 3px 10px;
-    border: 1px solid var(--theme-border);
-    border-radius: 20px;
-    background: rgba(255, 119, 0, 0.1);
 }
 
-.input-label {
-    display: block;
+.icon-close-btn {
+    background: #F8F6F0;
+    color: #6B7280; /* Grey */
+    border: 1px solid #C0C0C8; /* Silver */
+    border-radius: 6px;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.icon-close-btn:hover {
+    background: #7851A9; /* Royal Purple */
+    color: #FBFBFD;
+    border-color: #6A0DAD;
+}
+
+.icon-close-btn.hidden {
+    display: none;
+}
+
+.light-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.light-label {
     font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #aaaaaa;
-    margin-bottom: 4px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: #5A1846; /* Plum Purple */
+}
+
+.light-input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 12px;
+    color: #121214;
+    background: #F8F6F0; /* Pearl White */
+    border: 1px solid #C0C0C8; /* Silver */
+    border-radius: 8px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.light-input:focus-visible,
+.light-btn-primary:focus-visible,
+.light-btn-secondary:focus-visible,
+.icon-close-btn:focus-visible,
+.voice-option input:focus-visible {
+    outline: 2px solid #8F00FF; /* Violet */
+    outline-offset: 2px;
+}
+
+.voice-options-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+
+.voice-option {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 6px 8px;
+    background: #F8F6F0;
+    border: 1px solid #C0C0C8;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.voice-option:has(input:checked) {
+    border-color: #6A0DAD; /* Violet Purple */
+    background: rgba(120, 81, 169, 0.12);
+}
+
+.voice-option input {
+    accent-color: #7851A9; /* Royal Purple */
+    margin-bottom: 2px;
+}
+
+.voice-title {
+    font-weight: 700;
+    color: #121214;
+    font-size: 11px;
+}
+
+.voice-meta {
+    font-size: 10px;
+    color: #6B7280;
+}
+
+.light-status {
+    font-size: 10.5px;
+    color: #6B7280;
+    text-align: center;
+    min-height: 14px;
+}
+
+.light-btn-primary {
+    flex: 1;
+    padding: 7px 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #FBFBFD;
+    background: linear-gradient(135deg, #7851A9, #6A0DAD);
+    border: 1px solid #6A0DAD;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.light-btn-primary:hover {
+    opacity: 0.92;
+}
+
+.light-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.light-btn-secondary {
+    padding: 7px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #121214;
+    background: #F8F6F0;
+    border: 1px solid #C0C0C8;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.light-btn-secondary:hover {
+    background: #E8DCC4;
+    border-color: #967BB6;
+}
+
+.guide-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.guide-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 8px;
+    background: #F8F6F0;
+    border-left: 3px solid #7851A9; /* Royal Purple */
+    border-radius: 6px;
+    gap: 8px;
+}
+
+.guide-cmd {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6A0DAD; /* Violet Purple */
+    white-space: nowrap;
+}
+
+.guide-desc {
+    font-size: 10.5px;
+    color: #6B7280;
+    text-align: right;
 }

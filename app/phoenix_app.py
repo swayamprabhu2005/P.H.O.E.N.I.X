@@ -16,7 +16,7 @@ from commands.parser import CommandParser
 from execution.executor import CommandExecutor
 from memory.memory_manager import MemoryManager
 from voice.tts_engine import TTSEngine
-from voice.vosk_recognizer import VoskVoiceRecognizer
+from voice.engine_manager import VoiceEngineManager, switch_and_sync_engine
 from desktop.window_manager import DesktopWindowManager
 from desktop.tray_manager import SystemTrayManager
 
@@ -45,6 +45,7 @@ class PhoenixApp:
 
         # Pending confirmation state for unconstrained disambiguation
         self._pending_confirmation: Optional[Dict[str, Any]] = None
+        self._confirmation_timer: Optional[threading.Timer] = None
 
         # Voice Synthesis (Windows SAPI5)
         tts_cfg = self.config.get("assistant", {})
@@ -80,18 +81,14 @@ class PhoenixApp:
         # Build constrained grammar from command registry + memory phrases
         combined_phrases = self._build_grammar_phrases()
 
-        # Voice Recognition (Vosk)
-        voice_cfg = self.config.get("voice", {})
-        model_path = os.path.join(self.base_dir, "models", "vosk-model-small-en-us-0.15")
-
-        self.recognizer = VoskVoiceRecognizer(
-            model_path=model_path,
-            sample_rate=voice_cfg.get("sample_rate", 16000),
-            silence_timeout=voice_cfg.get("silence_timeout_seconds", 1.2),
-            energy_threshold=voice_cfg.get("energy_threshold", 250.0),
+        # Voice Recognition (Pluggable Engine Manager)
+        self.recognizer = VoiceEngineManager.create_recognizer(
+            config=self.config,
+            base_dir=self.base_dir,
             grammar_phrases=combined_phrases,
             on_text_recognized=self.on_text_recognized,
-            on_partial=self.on_partial_recognized
+            on_partial=self.on_partial_recognized,
+            tts_is_speaking=lambda: self.tts.is_speaking,
         )
 
         self._running = True
@@ -153,9 +150,10 @@ class PhoenixApp:
         # Run webview GUI loop (blocking main thread)
         webview.start(self._on_webview_ready, gui="edgechromium", icon=ico_path)
 
-    def on_onboarding_complete(self, name: str, groq_key: str):
-        chosen_name = name.strip().title() if name.strip() else "Operator"
+    def on_onboarding_complete(self, name: str, groq_key: str, voice_engine: str = "vosk"):
+        chosen_name = name.strip().title() if name.strip() else self.get_user_name()
         chosen_key = groq_key.strip()
+        chosen_engine = (voice_engine or "vosk").strip().lower()
 
         if "user" not in self.config:
             self.config["user"] = {}
@@ -163,8 +161,8 @@ class PhoenixApp:
 
         if "ai" not in self.config:
             self.config["ai"] = {}
-        self.config["ai"]["groq_api_key"] = chosen_key
         if chosen_key:
+            self.config["ai"]["groq_api_key"] = chosen_key
             self.groq_client.set_api_key(chosen_key)
 
         config_path = os.path.join(self.base_dir, "config", "settings.json")
@@ -182,7 +180,36 @@ class PhoenixApp:
         except Exception:
             pass
 
-        self.tts.speak(f"Personalization complete. At your service, {chosen_name}.")
+        def _sync_voice():
+            current_engine = getattr(self.recognizer, "engine_name", "vosk")
+            ok, msg = switch_and_sync_engine(chosen_engine, self.base_dir, self.config.get("ai", {}).get("groq_api_key", ""))
+            if not ok:
+                self.window_mgr.notify_onboarding_result(False, msg)
+                self.tts.speak(msg)
+                return
+
+            self.config = self._load_config()
+            if chosen_engine != current_engine:
+                was_listening = self.state_mgr.current_state == AppState.LISTENING
+                try:
+                    self.recognizer.stop_listening()
+                except Exception:
+                    pass
+                self.recognizer = VoiceEngineManager.create_recognizer(
+                    config=self.config,
+                    base_dir=self.base_dir,
+                    grammar_phrases=self._build_grammar_phrases(),
+                    on_text_recognized=self.on_text_recognized,
+                    on_partial=self.on_partial_recognized,
+                    tts_is_speaking=lambda: self.tts.is_speaking,
+                )
+                if was_listening:
+                    self.recognizer.start_listening()
+
+            self.window_mgr.notify_onboarding_result(True, msg)
+            self.tts.speak(f"Settings saved. At your service, {chosen_name}.")
+
+        threading.Thread(target=_sync_voice, daemon=True).start()
 
     def _on_webview_ready(self):
         """Called once the pywebview window is loaded. Starts silently in standby."""
@@ -192,7 +219,8 @@ class PhoenixApp:
 
         setup_marker = os.path.join(self.base_dir, "config", ".setup_done")
         if not os.path.exists(setup_marker) or not self.config.get("user", {}).get("name"):
-            self.window_mgr.show_onboarding()
+            current_engine = self.config.get("voice", {}).get("engine", "vosk")
+            self.window_mgr.show_onboarding(self.config.get("user", {}).get("name", ""), current_engine, is_reopen=False)
 
         # Calibrate ambient microphone noise floor silently in background
         threading.Thread(target=self.recognizer.calibrate_ambient_noise, args=(0.4,), daemon=True).start()
@@ -216,6 +244,7 @@ class PhoenixApp:
 
     def go_to_sleep(self):
         """Puts assistant to standby and releases microphone."""
+        self._cancel_confirmation_timeout()
         self.recognizer.stop_listening()
         self.state_mgr.transition_to(AppState.STANDBY)
         curr_dir = self.navigator.get_current_directory()
@@ -275,6 +304,7 @@ class PhoenixApp:
         if self._pending_confirmation:
             intent, _, _ = self.parser.parse(recognized_text)
             if intent == "CONFIRM_YES":
+                self._cancel_confirmation_timeout()
                 action = self._pending_confirmation
                 self._pending_confirmation = None
                 self.window_mgr.hide_confirmation()
@@ -282,11 +312,13 @@ class PhoenixApp:
                 self._execute_confirmed_action(action["target"], action["action_type"], action["action_data"])
                 return
             elif intent == "CONFIRM_NO":
+                self._cancel_confirmation_timeout()
                 self._pending_confirmation = None
                 self.window_mgr.hide_confirmation()
                 self.recognizer.set_grammar(self._build_grammar_phrases())
-                self.tts.speak("Cancelled. You may type manually or speak another command.")
+                self.tts.speak("Cancelled.")
                 self.state_mgr.transition_to(AppState.LISTENING)
+                self.window_mgr.update_ui_state("listening", "", self.navigator.get_current_directory())
                 return
 
         self.state_mgr.transition_to(AppState.PROCESSING)
@@ -317,6 +349,19 @@ class PhoenixApp:
             return
         elif intent == "SHUTDOWN":
             self.shutdown()
+            return
+        elif intent == "OPEN_SETTINGS":
+            current_engine = self.config.get("voice", {}).get("engine", "vosk")
+            self.window_mgr.show_onboarding(self.get_user_name(), current_engine, is_reopen=True)
+            self.tts.speak("Opening settings.")
+            self.state_mgr.transition_to(AppState.LISTENING)
+            self.window_mgr.update_ui_state("listening", "", curr_dir)
+            return
+        elif intent == "OPEN_GUIDE":
+            self.window_mgr.show_guide()
+            self.tts.speak("Opening guide.")
+            self.state_mgr.transition_to(AppState.LISTENING)
+            self.window_mgr.update_ui_state("listening", "", curr_dir)
             return
 
         # Handle unconstrained Web Search with Groq / Memory disambiguation
@@ -354,6 +399,11 @@ class PhoenixApp:
         if speech_text:
             self.tts.speak(speech_text)
 
+        # Auto-sleep when locking PC so mic and sphere don't consume power while locked
+        if intent == "LOCK_PC" and success:
+            self.go_to_sleep()
+            return
+
         # Return to listening state
         self.state_mgr.transition_to(AppState.LISTENING)
 
@@ -381,41 +431,69 @@ class PhoenixApp:
 
         self._prompt_search_confirmation(target_name, target_url)
 
+    def _cancel_confirmation_timeout(self):
+        if self._confirmation_timer is not None:
+            try:
+                self._confirmation_timer.cancel()
+            except Exception:
+                pass
+            self._confirmation_timer = None
+
+    def _start_confirmation_timeout(self, timeout_seconds: float = 10.0):
+        self._cancel_confirmation_timeout()
+
+        def _on_timeout():
+            if not self._pending_confirmation:
+                return
+            self._pending_confirmation = None
+            self.window_mgr.hide_confirmation()
+            self.recognizer.set_grammar(self._build_grammar_phrases())
+            if self.state_mgr.current_state != AppState.STANDBY:
+                self.state_mgr.transition_to(AppState.LISTENING)
+                self.window_mgr.update_ui_state("listening", "", self.navigator.get_current_directory())
+
+        self._confirmation_timer = threading.Timer(timeout_seconds, _on_timeout)
+        self._confirmation_timer.daemon = True
+        self._confirmation_timer.start()
+
+    def _begin_confirmation(self, prompt: str, target_name: str, action_type: str, action_data: Dict[str, Any], spoken_prompt: str):
+        """Starts voice-only confirmation (or UI dialog only if explicitly enabled in settings)."""
+        self._pending_confirmation = {
+            "action_type": action_type,
+            "target": target_name,
+            "action_data": action_data,
+        }
+
+        # State-dependent grammar: restrict vocabulary strictly to confirmation tokens
+        self.recognizer.set_grammar(["yes", "yeah", "yep", "no", "nope", "cancel", "confirm", "proceed", "okay", "sure", "stop"])
+
+        voice_only = self.config.get("assistant", {}).get("voice_only_confirmation", True)
+        if voice_only:
+            self.window_mgr.hide_confirmation()
+            self.window_mgr.update_ui_state("awaiting_confirmation", "", self.navigator.get_current_directory())
+        else:
+            self.window_mgr.show_confirmation(prompt, target_name, action_type, action_data)
+
+        self.tts.speak(spoken_prompt)
+        self._start_confirmation_timeout(10.0)
+
     def _prompt_search_confirmation(self, target_name: str, target_url: str = ""):
-        """Prompts confirmation dialog with manual typing fallback."""
+        """Prompts confirmation for web search or website navigation."""
         prompt = "Did you mean to open:" if target_url else "Did you mean to search:"
         action_data = {"url": target_url, "query": target_name}
-
-        self._pending_confirmation = {
-            "action_type": "search",
-            "target": target_name,
-            "action_data": action_data
-        }
-
-        # State-dependent grammar: restrict vocabulary strictly to confirmation tokens
-        self.recognizer.set_grammar(["yes", "no", "cancel", "confirm", "proceed", "okay", "stop"])
-        self.window_mgr.show_confirmation(prompt, target_name, "search", action_data)
         spoken_prompt = f"Did you mean to open {target_name}?" if target_url else f"Did you mean to search {target_name}?"
-        self.tts.speak(spoken_prompt)
+        self._begin_confirmation(prompt, target_name, "search", action_data, spoken_prompt)
 
     def _prompt_file_confirmation(self, intent: str, name: str, params: dict):
-        """Prompts confirmation for file or folder naming with manual typing fallback."""
+        """Prompts confirmation for file or folder naming."""
         item_type = "folder" if "FOLDER" in intent else "file"
         prompt = f"Confirm {item_type} name:"
-
-        self._pending_confirmation = {
-            "action_type": intent,
-            "target": name,
-            "action_data": params
-        }
-
-        # State-dependent grammar: restrict vocabulary strictly to confirmation tokens
-        self.recognizer.set_grammar(["yes", "no", "cancel", "confirm", "proceed", "okay", "stop"])
-        self.window_mgr.show_confirmation(prompt, name, intent, params)
-        self.tts.speak(f"Is {name} the {item_type} name you intend to use?")
+        spoken_prompt = f"Is {name} the {item_type} name you intend to use?"
+        self._begin_confirmation(prompt, name, intent, params, spoken_prompt)
 
     def on_gui_confirm_action(self, confirmed: bool, manual_text: str, action_type: str, action_data: Dict[str, Any]):
         """Called directly when user clicks Yes / Cancel or submits manual text in dialog."""
+        self._cancel_confirmation_timeout()
         self._pending_confirmation = None
         self.window_mgr.hide_confirmation()
         # Restore full command vocabulary grammar

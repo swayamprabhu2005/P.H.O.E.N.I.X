@@ -54,9 +54,9 @@ class WindowApi:
         if self.on_save_groq_key:
             self.on_save_groq_key(key)
 
-    def complete_onboarding(self, name: str, groq_key: str):
+    def complete_onboarding(self, name: str, groq_key: str, voice_engine: str = "vosk"):
         if self.on_onboarding_complete:
-            self.on_onboarding_complete(name, groq_key)
+            self.on_onboarding_complete(name, groq_key, voice_engine)
 
 class DesktopWindowManager:
     """Manages the pywebview transparent floating desktop HUD."""
@@ -123,9 +123,9 @@ class DesktopWindowManager:
         if self.on_save_groq_key:
             self.on_save_groq_key(key)
 
-    def _handle_onboarding_complete(self, name: str, groq_key: str):
+    def _handle_onboarding_complete(self, name: str, groq_key: str, voice_engine: str = "vosk"):
         if self.on_onboarding_complete:
-            self.on_onboarding_complete(name, groq_key)
+            self.on_onboarding_complete(name, groq_key, voice_engine)
 
     def _apply_taskbar_icon(self):
         """Applies high-res P.H.O.E.N.I.X. icon to Win32 window HWND so Taskbar shows official logo."""
@@ -213,10 +213,24 @@ class DesktopWindowManager:
             except Exception:
                 pass
 
-    def show_onboarding(self):
-        """Shows first-time onboarding card on the HUD."""
+    def show_onboarding(self, current_name: str = "", current_engine: str = "vosk", is_reopen: bool = False):
+        """Shows unified settings/onboarding card on the HUD."""
         if self.window:
-            js = "if (window.showOnboarding) window.showOnboarding();"
+            safe_name = (current_name or "").replace("'", "\\'").replace('"', '\\"')
+            safe_engine = (current_engine or "vosk").replace("'", "\\'")
+            reopen_str = "true" if is_reopen else "false"
+            js = f"if (window.showOnboarding) window.showOnboarding('{safe_name}', '{safe_engine}', {reopen_str});"
+            try:
+                self.window.evaluate_js(js)
+            except Exception:
+                pass
+
+    def notify_onboarding_result(self, success: bool, message: str = ""):
+        """Notifies settings/onboarding UI whether voice model sync succeeded."""
+        if self.window:
+            bool_str = "true" if success else "false"
+            safe_msg = (message or "").replace("'", "\\'").replace('"', '\\"').replace("\n", " ")
+            js = f"if (window.onOnboardingResult) window.onOnboardingResult({bool_str}, '{safe_msg}');"
             try:
                 self.window.evaluate_js(js)
             except Exception:
@@ -225,6 +239,23 @@ class DesktopWindowManager:
     def hide_onboarding(self):
         if self.window:
             js = "if (window.hideOnboarding) window.hideOnboarding();"
+            try:
+                self.window.evaluate_js(js)
+            except Exception:
+                pass
+
+    def show_guide(self):
+        """Shows core P.H.O.E.N.I.X. commands guide card."""
+        if self.window:
+            js = "if (window.showGuide) window.showGuide();"
+            try:
+                self.window.evaluate_js(js)
+            except Exception:
+                pass
+
+    def hide_guide(self):
+        if self.window:
+            js = "if (window.hideGuide) window.hideGuide();"
             try:
                 self.window.evaluate_js(js)
             except Exception:

@@ -381,6 +381,9 @@ class PhoenixCore {
         } else if (this.state === 'processing') {
             baseSpeed = 5.0; // Hyperspeed processing
             lightInt = 6.5;
+        } else if (this.state === 'awaiting_confirmation') {
+            baseSpeed = 2.4; // Rhythmic attentive pulse without text overlay
+            lightInt = 5.0 + Math.sin(time * 7.5) * 1.4;
         } else if (this.state === 'success') {
             baseSpeed = 2.4;
             lightInt = 5.5;

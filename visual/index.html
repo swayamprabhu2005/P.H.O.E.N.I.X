@@ -37,20 +37,67 @@
             </div>
         </div>
 
-        <!-- First-Run Holographic Personalization Card -->
-        <div id="onboarding-card" class="holo-dialog holo-onboarding hidden">
-            <div class="onboarding-badge">INITIALIZATION</div>
-            <div class="dialog-prompt">Personalize your desktop AI assistant:</div>
-            <div class="dialog-input-wrap">
-                <label class="input-label" for="onboard-name-input">Operator Name</label>
-                <input id="onboard-name-input" type="text" placeholder="What should PHOENIX call you?" autocomplete="off" spellcheck="false">
+        <!-- Unified Square Settings & Onboarding Card (Light Theme - Chroma-Craft Purple/Magenta) -->
+        <div id="onboarding-card" class="holo-dialog light-square-card hidden" role="dialog" aria-label="P.H.O.E.N.I.X. Settings">
+            <div class="card-header">
+                <span class="light-badge">P.H.O.E.N.I.X. SETUP</span>
+                <button id="btn-onboard-close" class="icon-close-btn hidden" type="button" aria-label="Close Settings">&#10005;</button>
             </div>
-            <div class="dialog-input-wrap">
-                <label class="input-label" for="onboard-groq-input">Groq Cloud AI Key (Optional)</label>
-                <input id="onboard-groq-input" type="password" placeholder="gsk_... (press Enter to skip)" autocomplete="off" spellcheck="false">
+            <div class="light-field">
+                <label class="light-label" for="onboard-name-input">Operator Name</label>
+                <input id="onboard-name-input" class="light-input" type="text" placeholder="What should PHOENIX call you?" autocomplete="off" spellcheck="false">
             </div>
+            <div class="light-field">
+                <label class="light-label" for="onboard-groq-input">Groq API Key (Optional)</label>
+                <input id="onboard-groq-input" class="light-input" type="password" placeholder="gsk_... (for Cloud AI & Whisper)" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="light-field">
+                <span class="light-label">Voice Model (Auto-Syncs &amp; Replaces Old)</span>
+                <div class="voice-options-list" role="radiogroup" aria-label="Voice Model">
+                    <label class="voice-option">
+                        <input type="radio" name="voice-engine" value="vosk" checked>
+                        <span class="voice-title">Vosk (Default)</span>
+                        <span class="voice-meta">Offline · 45 MB</span>
+                    </label>
+                    <label class="voice-option">
+                        <input type="radio" name="voice-engine" value="faster_whisper">
+                        <span class="voice-title">Faster-Whisper</span>
+                        <span class="voice-meta">Offline · 75 MB</span>
+                    </label>
+                    <label class="voice-option">
+                        <input type="radio" name="voice-engine" value="windows_native">
+                        <span class="voice-title">Windows Native</span>
+                        <span class="voice-meta">Built-in · 0 MB</span>
+                    </label>
+                    <label class="voice-option">
+                        <input type="radio" name="voice-engine" value="groq_whisper">
+                        <span class="voice-title">Groq Whisper</span>
+                        <span class="voice-meta">Cloud · 0 MB</span>
+                    </label>
+                </div>
+            </div>
+            <div id="onboard-status" class="light-status">Say "Help" anytime to re-open Settings.</div>
             <div class="dialog-actions">
-                <button id="btn-onboard-submit" class="holo-btn btn-yes">&#10004; Activate P.H.O.E.N.I.X.</button>
+                <button id="btn-onboard-submit" class="light-btn-primary" type="button">Save &amp; Activate</button>
+            </div>
+        </div>
+
+        <!-- Square Core Commands Guide Box (Light Theme - Chroma-Craft Purple/Magenta) -->
+        <div id="guide-card" class="holo-dialog light-square-card hidden" role="dialog" aria-label="P.H.O.E.N.I.X. Guide">
+            <div class="card-header">
+                <span class="light-badge">COMMAND GUIDE</span>
+                <button id="btn-guide-close" class="icon-close-btn" type="button" aria-label="Close Guide">&#10005;</button>
+            </div>
+            <ul class="guide-list">
+                <li class="guide-row"><span class="guide-cmd">"Help"</span><span class="guide-desc">Open Settings &amp; switch voice model</span></li>
+                <li class="guide-row"><span class="guide-cmd">"Guide"</span><span class="guide-desc">Show this P.H.O.E.N.I.X. guide</span></li>
+                <li class="guide-row"><span class="guide-cmd">"Sleep" / "Standby"</span><span class="guide-desc">Enter standby &amp; mute mic</span></li>
+                <li class="guide-row"><span class="guide-cmd">"Shutdown"</span><span class="guide-desc">Exit P.H.O.E.N.I.X. cleanly</span></li>
+                <li class="guide-row"><span class="guide-cmd">"Call me [Name]"</span><span class="guide-desc">Update your greeting name</span></li>
+            </ul>
+            <div class="dialog-actions">
+                <button id="btn-guide-help" class="light-btn-primary" type="button">Open Settings (Help)</button>
+                <button id="btn-guide-done" class="light-btn-secondary" type="button">Close</button>
             </div>
         </div>
     </div>
